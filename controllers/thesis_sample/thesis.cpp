@@ -66,13 +66,10 @@ void CFootBotThesis::Init(TConfigurationNode& t_node) {
     GetNodeAttribute(t_node, "no_turn_angle_threshold", cAngle);
     NoTurnAngleThreshold = ToRadians(cAngle);
     GetNodeAttribute(t_node, "max_speed", MaxSpeed);
+    
     cHeadingAngleOffset = ToRadians(CDegrees(1.0f));
     m_estate = STATE_INITIAL;
     TurningMechanism = NO_TURN;
-    Stop_x_motion = false;
-    Stop_y_motion = false;
-    StateInitialflag = false;
-    TransitFlag = false;
     m_cPosition = m_pcPosSens->GetReading().Position;
 
 }
@@ -83,35 +80,28 @@ void CFootBotThesis::Init(TConfigurationNode& t_node) {
 void CFootBotThesis::ControlStep() {
     
     CRadians angle;
-    CRadians angle1;
-    
+
     switch(m_estate){
             
-        /* State to turn the robot in proper direction */
+        /* State to get the heading direction */
         case STATE_INITIAL:
-            /* if first time calculating the heading angle */
-            if(StateInitialflag == false)
-            {
-                angle = CalculateHeadingAngle(m_cPosition);
-                cHeading_angle = angle;
-                StateInitialflag = true;
-            }
-            /* Turn the robot as per heading angle */
-            SetHeadingAngle(cHeading_angle);
+
+            angle = CalculateHeadingAngle(m_cPosition);
+            cHeading_angle = angle;
+            
+            /* change the state of the robot */
+            m_estate = STATE_ADJUST_DIRECTION;
             break;
             
         /* State to set the robot in motion */
         case STATE_TRANSISITION:
-            
-            /* If adjustment needed in the heading direction */
-            if(TransitFlag == true){
-                angle1 = CalculateHeadingAngle(cCurrentPos);
-                cHeading_angle = angle1;
-                SetHeadingAngle(cHeading_angle);
-            }
             /* function to set the robot in motion */
             TransitToGoal();
             break;
+            
+        case STATE_ADJUST_DIRECTION:
+            /* Turn the robot as per heading angle */
+            SetHeadingAngle(cHeading_angle);
             
         /* State to handle robot if reched goal */
         case STATE_GOAL:
@@ -130,55 +120,64 @@ void CFootBotThesis::ControlStep() {
 void CFootBotThesis::TransitToGoal(){
     
     Real X, Y, Z;
-
+    CRadians angle;
+    
+    bool bCollision;
     /* Get the diffusion vector to perform obstacle avoidance */
     CVector2 cDiffusion = DiffusionVector(bCollision);
-    
-    /* Set the transitflag to false to check if robot needs angle adjustments */
-    TransitFlag = false;
     
     /* Get the position of the footbot using position sensor */
     cCurrentPos = m_pcPosSens->GetReading().Position;
     X = cCurrentPos.GetX();
     Y = cCurrentPos.GetY();
     
-//    LOG << "Position: " << X << std::endl;
-//    LOG << "Position: " << Y << std::endl;
+    LOG << "Position X: " << X << std::endl;
+    LOG << "Position Y: " << Y << std::endl;
+    LOG << "transition_state: " << transition_state << std::endl;
+    LOG << "m_estate: " << m_estate << std::endl;
+    LOG << "Turning Mechanism " << TurningMechanism << std::endl;
+    LOG << "Adjustment_counter" << Adjustment_counter << std::endl;
+    LOG << "------------------------------------" << std::endl;
     
-    // check if x position is equal to goal x position
-    if(X <= (Rover_Goal_X[0] + 0.05) and X >= (Rover_Goal_X[0] - 0.05))
-       {
-           Stop_x_motion = true;
-       }
-    // check if y position is equal to goal y position
-    if(Y <= (Rover_Goal_Y[0] + 0.05) and Y >= (Rover_Goal_Y[0] - 0.05))
-       {
-           Stop_y_motion = true;
-       }
-    // if both x and y are equal to goal
-    if(Stop_x_motion == true and Stop_y_motion == true){
-        m_estate = STATE_GOAL;
-        
-    }
-    // if none is equal to goal then continue straight
-    else if((Stop_x_motion == false and Stop_y_motion == false and TransitFlag==false)){
-
-            LOG << "State Initial Flag" << StateInitialflag << std::endl;
-            LOG << "State Transition Flag" << TransitFlag << std::endl;
-            cDiffusion = MaxSpeed * cDiffusion;
-            /* Use the diffusion vector only */
-            SetWheelSpeeds(cDiffusion.Angle());
-        
-        }
-    // if either one is equal to goal then turn depending on the angle
-    else
-    {
-        LOG << "Position: " << X << std::endl;
-        LOG << "Position: " << Y << std::endl;
-        LOG << "State Initial Flag" << StateInitialflag << std::endl;
-        LOG << "State Transition Flag" << TransitFlag << std::endl;
-        TransitFlag = true;
-        StateInitialflag = true;
+    switch(transition_state){
+        /* state to check if the robot coordinates are equal the goal */
+        case GOAL_NOT_REACHED:
+            
+            /* Both coordinates are equal to goal coordinates */
+            if((X <= (Rover_Goal_X[0] + 0.05) and X >= (Rover_Goal_X[0] - 0.05)) and
+              (Y <= (Rover_Goal_Y[0] + 0.05) and Y >= (Rover_Goal_Y[0] - 0.05)))
+               {
+                   transition_state = GOAL_REACHED;
+               }
+            /* Only one of the coordinate is equal to one of the goal coordinate */
+            else if((X <= (Rover_Goal_X[0] + 0.05) and X >= (Rover_Goal_X[0] - 0.05)) or
+                   (Y <= (Rover_Goal_Y[0] + 0.05) and Y >= (Rover_Goal_Y[0] - 0.05)))
+            {
+                      
+               transition_state = ONE_COORDINATE_REACHED;
+            }
+            /* None of the coordinate is equal to goal coordinate */
+            else
+            {
+                cDiffusion = MaxSpeed * cDiffusion;
+                /* Use the diffusion vector only */
+                SetWheelSpeeds(cDiffusion.Angle());
+            }
+            break;
+        /* Only one of the coordinate is equal to one of the goal coordinate */
+        case ONE_COORDINATE_REACHED:
+            
+                angle = CalculateHeadingAngle(cCurrentPos);
+                cHeading_angle = angle;
+                SetHeadingAngle(cHeading_angle);
+            
+            break;
+            
+        /* Both coordinates are equal to goal coordinates */
+        case GOAL_REACHED:
+                m_estate = STATE_GOAL;
+            break;
+            
     }
 
 }
@@ -202,48 +201,68 @@ CRadians CFootBotThesis::CalculateHeadingAngle(CVector3 cPosition){
 /* Function to set the angle in which rover should head towards the goal */
 /****************************************/
 void CFootBotThesis::SetHeadingAngle(CRadians cheadangle){
+    
+    CRadians angle;
 
     // Every angle is for sure in the range [-PI,PI]
     CRadians cZAngle, cYAngle, cXAngle;
 
     cHeading_angle = cheadangle;
-    /* Calculate the wheel speeds to turn towards heading angle */
-    SetWheelSpeeds(cHeading_angle);
-    
+
     m_pcPosSens->GetReading().Orientation.ToEulerAngles(cZAngle, cYAngle, cXAngle);
     /* If the robot is in the X<0, Y>0 quadrant, go straight, otherwise rotate on the spot */
-//    LOG << "In function heading angle: " << cZAngle << std::endl;
-    LOG << "Angle: " << cZAngle << std::endl;
-    LOG << "Diffusion: " << bCollision << std::endl;
-
-//    LOG << "Angleoffset: " << cHeadingAngleOffset << std::endl;
-//    LOG << "Angle_comparison: " << (cHeading_angle - cHeadingAngleOffset) << std::endl;
-//    LOG << "Angle_comparison1: " << (cHeading_angle + cHeadingAngleOffset) << std::endl;
     
     /* check if the angle rotated is in the range (angle+1) and (angle-1) */
     if(cZAngle >= (cHeading_angle - 2*cHeadingAngleOffset) and
        cZAngle <= (cHeading_angle + 2*cHeadingAngleOffset)) {
         
         TurningMechanism = NO_TURN;
-
+        transition_state = GOAL_NOT_REACHED;
         m_estate = STATE_TRANSISITION;
     }
     /* continue to rotate at specified angle */
     else {
-
-         /* Fine tune the turning when the turn is hard turn and need to turn softly*/
-        if((cZAngle > (cHeading_angle + 10*cHeadingAngleOffset)) or
-          (cZAngle < (cHeading_angle - 10*cHeadingAngleOffset)))
+        
+        /* Get the diffusion vector to perform obstacle avoidance */
+        bool bCheckCollision;
+        CVector2 cDiffusion = DiffusionVector(bCheckCollision);
+        
+        /* if there is collision while adjusting the direction, set the direction to diffusion angle */
+        if(bCheckCollision):
         {
-            cHeading_angle = (cHeading_angle + cHeadingAngleOffset) - cHeading_angle;
+            LOG<< "Collision Detected"<< std::endl;
+            /* increment the counter, everytime there is collision and adjustment */
+            Adjustment_counter++;
             
-            /* turn the hard turn state to soft turn state */
-            if (cHeading_angle < NoTurnAngleThreshold) {
-                cHeading_angle = 2*(NoTurnAngleThreshold - cHeading_angle) + cHeading_angle;
-            }
+            /* Calculate the wheel speeds to turn towards heading angle */
+            SetWheelSpeeds(cDiffusion.Angle());
         }
         
-        m_estate = STATE_INITIAL;
+        else{
+            /* Fine tune the turning when the turn is hard turn and need to turn softly*/
+            if((cZAngle > (cHeading_angle + 10*cHeadingAngleOffset)) or
+               (cZAngle < (cHeading_angle - 10*cHeadingAngleOffset)))
+            {
+                cHeading_angle = (cHeading_angle + cHeadingAngleOffset) - cHeading_angle;
+                
+                /* turn the hard turn state to soft turn state */
+                if (cHeading_angle < NoTurnAngleThreshold) {
+                    cHeading_angle = 2*(NoTurnAngleThreshold - cHeading_angle) + cHeading_angle;
+                }
+            }
+            /* Calculate the wheel speeds to turn towards heading angle */
+            SetWheelSpeeds(cHeading_angle);
+            
+        }
+       
+        /* Change the state to STATE_ADJUST if need to adjust the angles */
+        if(Adjustment < 20){
+            m_estate = STATE_ADJUST_DIRECTION;
+        }
+        else{
+            LOG<< "Stopped the robot as number of adjustments exceeded"<< std::endl;
+            m_estate = STATE_GOAL;
+        }
     }
 }
 
@@ -320,16 +339,6 @@ void CFootBotThesis::SetWheelSpeeds(CRadians cAngle) {
         fLeftWheelSpeed  = fSpeed2;
         fRightWheelSpeed = fSpeed1;
     }
-    
-    /* Finally, set the wheel speeds */
-    LOG << "Turning Mechanism " << TurningMechanism << std::endl;
-    LOG << "Heading Angle" << cHeading_angle << std::endl;
-    LOG << "Angle parameter input" << cAngle <<std::endl;
-    LOG << "State" << m_estate <<std::endl;
-    LOG << "------------------------------------" << std::endl;
-
-//    LOG << "Left Speed: " << fLeftWheelSpeed << std::endl;
-//    LOG << "Right Speed: " << fRightWheelSpeed << std::endl;
     
     m_pcWheels->SetLinearVelocity(fLeftWheelSpeed, fRightWheelSpeed);
 }

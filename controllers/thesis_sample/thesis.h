@@ -110,7 +110,8 @@ private:
     enum EState
             {
                 STATE_INITIAL = 0,
-                STATE_TRANSISITION,
+                STATE_TRANSITION,
+                STATE_ADJUST_DIRECTION,
                 STATE_GOAL
             };
     
@@ -120,6 +121,12 @@ private:
             SOFT_TURN,   // both wheels are turning forwards, but at different speeds
             HARD_TURN    // wheels are turning with opposite speeds
         };
+    enum ETransitionState
+    {
+        GOAL_NOT_REACHED = 0,
+        ONE_COORDINATE_REACHED,
+        GOAL_REACHED
+    };
     
 private:
 
@@ -153,28 +160,24 @@ private:
    /* Angle tolerance range to go straight.
     * It is set to [-alpha,alpha]. */
    CRange<CRadians> GoStraightAngleRange;
-   CRadians cAngle1;
-   CDegrees cAngle;
+
    CVector2 cAccumulator;
    EState m_estate;
    ETurningMechanism TurningMechanism;
+   ETransitionState transition_state;
    /*
    * Angular thresholds to change turning state.
    */
    CRadians HardTurnOnAngleThreshold;
    CRadians SoftTurnOnAngleThreshold;
    CRadians NoTurnAngleThreshold;
-    CRadians cHeading_angle;
+   CRadians cHeading_angle;
    /* Maximum wheel speed */
    Real MaxSpeed;
-   bool bCollision;
-   bool Stop_x_motion;
-   bool Stop_y_motion;
    CRadians cHeadingAngleOffset;
    CVector3 m_cPosition;
-   bool StateInitialflag;
-   bool TransitFlag;
    CVector3 cCurrentPos;
+   UInt8 Adjustment_counter;
 };
 #endif
 
