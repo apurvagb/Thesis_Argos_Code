@@ -44,9 +44,9 @@
   <!-- ****************** -->
   <loop_functions library="build/loop_functions/custom_distributions_loop_functions/libcustom_distributions_loop_functions"
                   label="custom_distributions_loop_functions">
-    <cluster   center=" 5,0" robot_num="30" robot_density="0.1"  />
-    <scalefree center=" 0,0" robot_num="30" robot_range="1.5"      />
-    <line      center="-1,0" robot_num="10" robot_distance="0.3" />
+<!--    <cluster   center=" 5,0" robot_num="30" robot_density="0.1"  />-->
+    <scalefree center=" 0,0" robot_num="5" robot_range="1.5"      />
+<!--    <line      center="-1,0" robot_num="10" robot_distance="0.3" />-->
   </loop_functions>
 
   <!-- *********************** -->

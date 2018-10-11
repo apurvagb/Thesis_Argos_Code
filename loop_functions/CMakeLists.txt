@@ -14,7 +14,7 @@ if(ARGOS_COMPILE_QTOPENGL)
   add_subdirectory(trajectory_loop_functions)
   add_subdirectory(id_loop_functions)
   add_subdirectory(manualcontrol_loop_functions)
-#add_subdirectory(thesis_loop_functions)
+  add_subdirectory(thesis_loop_functions)
 endif(ARGOS_COMPILE_QTOPENGL)
 
 # If GALIB was found, also descend into galib_phototaxis_loop_functions

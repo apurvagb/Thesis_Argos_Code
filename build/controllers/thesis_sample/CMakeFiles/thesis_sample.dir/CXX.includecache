@@ -37,6 +37,12 @@ argos3/plugins/robots/generic/control_interface/ci_positioning_sensor.h
 -
 math.h
 -
+stack
+-
+iostream
+-
+sstream
+-
 
 /usr/local/include/argos3/core/config.h
 

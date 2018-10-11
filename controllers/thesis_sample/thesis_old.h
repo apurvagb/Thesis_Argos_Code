@@ -33,12 +33,9 @@
 #include <argos3/core/simulator/space/space.h>
 /* Definition of the positioning sensor */
 #include <argos3/plugins/robots/generic/control_interface/ci_positioning_sensor.h>
-
+//# include <argos3/plugins/robots/footbot/simulator/pointmass3d_footbot_model.h>
 /* math library*/
 #include <math.h>
-#include <stack>
-#include <iostream>
-#include <sstream>
 
 /*
  * All the ARGoS stuff in the 'argos' namespace.
@@ -53,8 +50,8 @@ class CFootBotThesis : public CCI_Controller {
 
 public:
     
-    Real Rover_Goal_X[5] = {1, 1.5, 0, 0, -1};
-    Real Rover_Goal_Y[5] = {1, -1, 0, 0, 1};
+    Real Rover_Goal_X[5] = {-1, 2, 2, 5, 7};
+    Real Rover_Goal_Y[5] = {1, 5, 1, 5, 1};
     
     
    /* Class constructor. */
@@ -93,103 +90,44 @@ public:
     * completeness.
     */
    virtual void Destroy() {}
+
     
-    
-public:
-    struct RobotData{
-        CVector3 TargetPosition;
-        CVector3 StartPosition;
-        UInt16 id_robot;
-        UInt16 Priority;
-        Real fBaseAngularWheelSpeed;
-        Real fLinearWheelSpeed;
-        bool GoingToNest;
-        CRadians InitialOrientation;
-        Real TotalDistanceToTarget;
-        UInt16 Intial_TurningWaitTime;
-        UInt16 StopTurningTime;
-        Real dist;
-        std::stack<CVector3>WaypointStack;
-    };
-    
-    struct IntersectionData{
-        UInt16 Robot_ID_Intersectingwith;
-        bool Intersection_flag;
-        CVector3 IntersectionPoint;
-    };
-    
-    /*
-     * Returns the robot data
-     */
-    inline RobotData& GetRobotData() {
-        return stRobotData;
-    }
-    
-    /*
-     * Returns the robot data
-     */
-    inline void SetRobotLinearVelocity(Real vel) {
-        stRobotData.fLinearWheelSpeed = vel;
-    }
-    
-    inline void SetRobotStopTurningTime(UInt16 time)
-    {
-        stRobotData.StopTurningTime = time;
-    }
-    
-    /*
-     * Returns the intersection data of the robot
-     */
-    inline IntersectionData& GetIntersectionData() {
-        return st_IntersectionData;
-    }
-    
-public:
-    RobotData stRobotData;
-    
-    IntersectionData st_IntersectionData;
 private:
     
-    void SetWheelSpeeds(CRadians cAngle);
+    void SetHeadingAngle(CRadians cheadangle);
     
-    UInt16 GetTicksToWait(Real length, Real Speed);
-    
-    Real CalculateArcLength(Real AngleToTurn);
-    
-    Real CalculateTargetDistance(CVector3 cPosition, CVector3 TargetPosition);
-    
-    UInt16 GetInitial_TurningWaitTime(CFootBotThesis::RobotData stRobotData);
-    
-    CRadians GetHeadingAngle();
-    
-    CVector3 GetPosition();
-    
-    bool IsAtTarget();
-    
-    void SetNextMovement();
-    
-    void SetLeftTurn(Real newAngleToTurnInDegrees);
-    
-    void SetRightTurn(Real newAngleToTurnInDegrees);
-    
-    void SetMoveForward(Real newTargetDistance);
-    
-    void SetMoveBack(Real newTargetDistance);
+    void TransitToGoal();
     
     void Stop();
     
-    void PushMovement(UInt8 moveType, Real moveSize);
+    void SetWheelSpeeds(CRadians cAngle);
     
-    void PopMovement();
+    CVector2 DiffusionVector(bool& b_collision);
     
-    bool CollisionDetection();
+    CRadians CalculateHeadingAngle(CVector3 cPosition);
     
-    CVector2 GetCollisionVector();
+private:
+    enum EState
+            {
+                STATE_INITIAL = 0,
+                STATE_TRANSITION,
+                STATE_ADJUST_DIRECTION,
+                STATE_GOAL
+            };
     
-    void Move();
+    enum ETurningMechanism
+        {
+            NO_TURN = 0, // go straight
+            SOFT_TURN,   // both wheels are turning forwards, but at different speeds
+            HARD_TURN    // wheels are turning with opposite speeds
+        };
     
-    std::string  extractID(std::string str);
-    
+    enum ETransitionState
+    {
+        GOAL_NOT_REACHED = 0,
+        ONE_COORDINATE_REACHED,
+        GOAL_REACHED
+    };
     
 private:
 
@@ -224,61 +162,29 @@ private:
     * It is set to [-alpha,alpha]. */
    CRange<CRadians> GoStraightAngleRange;
 
+   CVector2 cAccumulator;
+   EState m_estate;
+   ETurningMechanism TurningMechanism;
+   ETransitionState transition_state;
    /*
    * Angular thresholds to change turning state.
    */
    CRadians HardTurnOnAngleThreshold;
    CRadians SoftTurnOnAngleThreshold;
    CRadians NoTurnAngleThreshold;
+//   CVector2 cHeading_angle;
+   CRadians cHeading_angle;
     
    /* Maximum wheel speed */
    Real MaxSpeed;
-    
-   const Real Kp                               = 5;
+   CRadians cHeadingAngleOffset;
+   CDegrees cAngle;
+   CVector3 m_cPosition;
+   CVector3 cCurrentPos;
+   UInt8 Adjustment_counter;
+   const Real Kp = 5;
    const Real FOOTBOT_RADIUS                   = 0.085036758f;
    const Real FOOTBOT_INTERWHEEL_DISTANCE      = 0.14f;
-//   const Real fBaseAngularWheelSpeed           = 8.0f;
-//   const Real fLinearWheelSpeed                = 10.0f;
-   const Real TargetDistanceTolerance          = 0.01;
-   const CRadians TargetAngleTolerance         = CRadians(0.04);
-   const Real SearchStepSize                   = 0.16;
-   const Real PI                               = 3.141592653589793238463;
-   UInt16 TicksToWaitforSafedistance;
-   UInt16 collision_counter;
-   CRange<Real> GoStraightAngleRangeInDegrees;
-   ticpp::Document m_tConfiguration;
-   TConfigurationNode m_tConfRoot;
-   UInt16 TicksToWait;
-   Real TicksPerSec;
-   CVector3 m_cPosition;
-
-   CVector3 cCurrentPos;
-   CVector3 CurrentWayPoint;
-
-   Real Distance_To_Goal;
-   bool Start_Motion;
-    
-    
-   // controller state variables
-   enum MovementState {
-        STOP    = 0,
-        LEFT    = 1,
-        RIGHT   = 2,
-        FORWARD = 3,
-        BACK    = 4
-    } CurrentMovementState;
-
-    /* movement definition variables */
-    struct Movement {
-        UInt8 type;
-        Real magnitude;
-    };
-
-    Movement previous_movement;
-    CVector2 previous_pattern_position;
-    std::stack<Movement> MovementStack;
-    
-
 };
 #endif
 

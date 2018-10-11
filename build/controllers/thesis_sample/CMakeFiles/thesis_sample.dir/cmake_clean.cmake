@@ -4,7 +4,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/thesis_sample.dir/thesis.cpp.o"
   "CMakeFiles/thesis_sample.dir/thesis_sample_autogen/mocs_compilation.cpp.o"
   "libthesis_sample.pdb"
-  "libthesis_sample.so"
+  "libthesis_sample.dylib"
 )
 
 # Per-language clean rules from dependency scanning.

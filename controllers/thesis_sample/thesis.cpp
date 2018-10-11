@@ -8,6 +8,7 @@
 #include <argos3/core/utility/configuration/argos_configuration.h>
 #include <argos3/plugins/robots/foot-bot/simulator/footbot_entity.h>
 
+
 /****************************************/
 /****************************************/
 
@@ -68,22 +69,68 @@ void CFootBotThesis::Init(TConfigurationNode& t_node) {
 
     GetNodeAttribute(t_node, "max_speed", MaxSpeed);
 
-    TargetPosition.Set(1,1,0);
+    
+    std::string id = GetId();
+
+    id = GetId();
+    std::string extracted_str = extractID(id);
+    stRobotData.id_robot = std::stoi(extracted_str);
+    stRobotData.TargetPosition.Set(Rover_Goal_X[stRobotData.id_robot],Rover_Goal_Y[stRobotData.id_robot],0);
+    stRobotData.WaypointStack.push(stRobotData.TargetPosition);
+    
     CurrentMovementState = STOP;
     GoStraightAngleRangeInDegrees.Set(-37.5, 37.5);
     TicksPerSec = 32;
-
+    TicksToWaitforSafedistance = ((2*(2*FOOTBOT_RADIUS)*TicksPerSec)/stRobotData.fLinearWheelSpeed);
     m_cPosition = m_pcPosSens->GetReading().Position;
+    
+    stRobotData.StartPosition = m_cPosition;
+    stRobotData.TotalDistanceToTarget = CalculateTargetDistance(m_cPosition, stRobotData.TargetPosition);
+    stRobotData.fLinearWheelSpeed = 10.0f;
+    stRobotData.fBaseAngularWheelSpeed = 8.0f;
+    
+   
+    stRobotData.Priority = stRobotData.id_robot;
+    
+    stRobotData.InitialOrientation = GetHeadingAngle();
+    
+    stRobotData.Intial_TurningWaitTime = GetInitial_TurningWaitTime(stRobotData);
+    
+    CurrentWayPoint = stRobotData.WaypointStack.top();
+    stRobotData.WaypointStack.pop();
+}
 
+/************************************************/
+/* Function to get the number in the string */
+/************************************************/
+std::string CFootBotThesis::extractID(std::string str)
+//void CFootBotThesis::extractID(std::string str)
+{
+    UInt8 counter;
+    std::string output_str;
+    for (counter=0; counter < str.length(); counter++){
+        if (isdigit(str[counter])){
+            output_str+= str[counter];
+        }
+    }
+    return output_str;
 }
 
 /****************************************/
+/* Control Step */
 /****************************************/
-
 void CFootBotThesis::ControlStep() {
+
+
+    LOG<<"RobotID: "<<stRobotData.id_robot<<std::endl;
+    LOG<<"Initial Turning Time: "<<stRobotData.Intial_TurningWaitTime<<std::endl;
+    LOG<<"Priority: "<<stRobotData.Priority<<std::endl;
+    LOG<<"Stop Turning Time: "<<stRobotData.StopTurningTime<<std::endl;
+    LOG<<"Distance between robot: "<<stRobotData.dist<<std::endl;
+    LOG<<"velocity: "<<stRobotData.fLinearWheelSpeed<<std::endl;
     
     Move();
-
+    
 }
 
 /****************************************/
@@ -108,39 +155,66 @@ Real CFootBotThesis::CalculateArcLength(Real AngleToTurn){
     return arc_length;
 }
 
-/****************************************/
+/********************************************************************************************/
 /* Function to calculate distance to Target*/
-/****************************************/
-Real CFootBotThesis::CalculateTargetDistance(CVector3 cPosition){
+/********************************************************************************************/
+Real CFootBotThesis::CalculateTargetDistance(CVector3 cPosition, CVector3 Targetposition){
     Real dist_y, dist_x, distance;
 
-    dist_x = TargetPosition.GetX() - cPosition.GetX();
-    dist_y = TargetPosition.GetY() - cPosition.GetY();
+    dist_x = Targetposition.GetX() - cPosition.GetX();
+    dist_y = Targetposition.GetY() - cPosition.GetY();
 
     distance = sqrt((dist_y * dist_y)+(dist_x * dist_x));
 
     return distance;
 }
 
-/****************************************/
+/***************************************************************************************************/
 /* Function to calculate the angle in which robot should head towards the goal */
-/****************************************/
-CRadians CFootBotThesis::GetTargetHeadingAngle(CVector3 cPosition){
-    Real dist_y, dist_x;
-    CRadians headingangle;
+/***************************************************************************************************/
+UInt16 CFootBotThesis::GetInitial_TurningWaitTime(CFootBotThesis::RobotData stRobotData){
 
-    dist_y = TargetPosition.GetY() - cPosition.GetY();
-    dist_x = TargetPosition.GetX() - cPosition.GetX();
+    UInt16 TicksToWaitToTurn;
+    Real newAngleToTurnInDegrees, s;
 
-
-    /* Get the heading angle towards the goal */
-    headingangle = CRadians(atan2(dist_y, dist_x)) ;
-    return headingangle;
+    /* get the heading angle towards goal */
+    
+//    CRadians headingToTarget = (stRobotData.TargetPosition - stRobotData.StartPosition).GetZAngle();
+    CRadians headingToTarget = (CurrentWayPoint - stRobotData.StartPosition).GetZAngle();
+    
+    
+    /* get the current heading angle of the robot */
+    CRadians headingToTargetError = (stRobotData.InitialOrientation - headingToTarget).SignedNormalize();
+    
+    /* turn left */
+    if(headingToTargetError > TargetAngleTolerance)
+    {
+       newAngleToTurnInDegrees = -ToDegrees(headingToTargetError).GetValue();
+       s = CalculateArcLength(newAngleToTurnInDegrees);
+       TicksToWaitToTurn = GetTicksToWait(s, stRobotData.fBaseAngularWheelSpeed);
+    }
+    /* turn right */
+    else if(headingToTargetError < -TargetAngleTolerance)
+    {
+        newAngleToTurnInDegrees = ToDegrees(headingToTargetError).GetValue();
+        s = CalculateArcLength(newAngleToTurnInDegrees);
+        TicksToWaitToTurn = GetTicksToWait(s, stRobotData.fBaseAngularWheelSpeed);
+    }
+    /* Move Forward */
+    else
+    {
+        /* no time required to turn */
+        TicksToWaitToTurn = 0;
+    }
+    
+    return TicksToWaitToTurn;
+//    stRobotData.Intial_TurningWaitTime = TicksToWaitToTurn;
+//    LOG<<"Initial Turning Time individual: "<<stRobotData.Intial_TurningWaitTime<<std::endl;
 }
 
-/****************************************/
+/**********************************************************************/
 /* Function to get the angle in which robot is heading */
-/****************************************/
+/**********************************************************************/
 CRadians CFootBotThesis::GetHeadingAngle(){
 
     // Every angle is for sure in the range [-PI,PI]
@@ -172,7 +246,9 @@ bool CFootBotThesis::IsAtTarget()
     DistTol = TargetDistanceTolerance;
     AngleTol = TargetAngleTolerance;
 
-    Real distanceToTarget = (TargetPosition - GetPosition()).Length();
+//    Real distanceToTarget = (stRobotData.TargetPosition - GetPosition()).Length();
+    
+    Real distanceToTarget = (CurrentWayPoint - GetPosition()).Length();
 
     return (distanceToTarget < DistTol) ? (true) : (false);
 }
@@ -188,21 +264,21 @@ void CFootBotThesis::SetNextMovement()
     DistTol = TargetDistanceTolerance;
     AngleTol = TargetAngleTolerance;
 
+
     /* if the movement stack is empty and movement state is STOP */
     if(MovementStack.size() == 0 && CurrentMovementState == STOP) {
+        
+            
         /* get the distance between current point and goal point */
-        Real distanceToTarget = (TargetPosition - GetPosition()).Length();
-        LOG << "distanceToTarget: " <<distanceToTarget<<std::endl;
+//        Real distanceToTarget = (stRobotData.TargetPosition - GetPosition()).Length();
+        Real distanceToTarget = (CurrentWayPoint - GetPosition()).Length();
         
         /* get the heading angle towards goal */
-//        CRadians headingToTarget = GetTargetHeadingAngle(GetPosition());
-        CRadians headingToTarget = (TargetPosition - GetPosition()).GetZAngle();
-        LOG << "headingToTarget: " <<headingToTarget<<std::endl;
-        LOG << "heading_angle: " <<GetHeadingAngle()<<std::endl;
-        
+//        CRadians headingToTarget = (stRobotData.TargetPosition - GetPosition()).GetZAngle();
+        CRadians headingToTarget = (CurrentWayPoint - GetPosition()).GetZAngle();
+
         /* get the current heading angle of the robot */
         CRadians headingToTargetError = (GetHeadingAngle() - headingToTarget).SignedNormalize();
-        LOG << "headingToTargetError: " <<headingToTargetError<<std::endl;
 
         /* check if robot did not reach the traget */
         if(!IsAtTarget()) {
@@ -210,13 +286,11 @@ void CFootBotThesis::SetNextMovement()
             /* turn left */
             if(headingToTargetError > AngleTol)
             {
-                LOG << "value pushed to stack: " <<-ToDegrees(headingToTargetError).GetValue()<<std::endl;
                 PushMovement(LEFT, -ToDegrees(headingToTargetError).GetValue());
             }
             /* turn right */
             else if(headingToTargetError < -AngleTol)
             {
-                LOG << "value pushed to stack: " <<ToDegrees(headingToTargetError).GetValue()<<std::endl;
                 PushMovement(RIGHT, ToDegrees(headingToTargetError).GetValue());
             }
             /* Move Forward */
@@ -227,8 +301,22 @@ void CFootBotThesis::SetNextMovement()
         }
         /* robot has reached the target */
         else {
-            PushMovement(STOP, 0.0);
+            
+//            PushMovement(STOP, 0.0);
+            
+            /* get the next waypoint unless the stack is empty */
+            if(!stRobotData.WaypointStack.empty())
+            {
+                CurrentWayPoint = stRobotData.WaypointStack.top();
+                stRobotData.WaypointStack.pop();
+                CurrentMovementState = STOP;
+            }
+            /* if stack is empty, robot has reached the target */
+            else{
+                PushMovement(STOP, 0.0);
+            }
         }
+       
     }
     /* continue the robot motion */
     else {
@@ -242,19 +330,17 @@ void CFootBotThesis::SetLeftTurn(Real newAngleToTurnInDegrees) {
 
     if(newAngleToTurnInDegrees > 0.0) {
         Real s = CalculateArcLength(newAngleToTurnInDegrees);
-        LOG << "Arc length " <<s<<std::endl;
-        TicksToWait = GetTicksToWait(s, fBaseAngularWheelSpeed);
-        LOG << "Ticks_To_Wait: " <<TicksToWait<<std::endl;
+
+        TicksToWait = GetTicksToWait(s, stRobotData.fBaseAngularWheelSpeed);
+
         CurrentMovementState = LEFT;
-        LOG << "CurrentMovementState: " <<CurrentMovementState<<std::endl;
 
     } else if(newAngleToTurnInDegrees < 0.0) {
         Real s = CalculateArcLength(newAngleToTurnInDegrees);
-        LOG << "Arc length " <<s<<std::endl;
-        TicksToWait = GetTicksToWait(s, fBaseAngularWheelSpeed);
-        LOG << "Ticks_To_Wait" <<TicksToWait<<std::endl;
+
+        TicksToWait = GetTicksToWait(s, stRobotData.fBaseAngularWheelSpeed);
+
         CurrentMovementState = RIGHT;
-        LOG << "CurrentMovementState: " <<CurrentMovementState<<std::endl;
 
     } else {
         Stop();
@@ -268,24 +354,47 @@ void CFootBotThesis::SetRightTurn(Real newAngleToTurnInDegrees) {
 
     if(newAngleToTurnInDegrees > 0.0) {
         Real s = CalculateArcLength(newAngleToTurnInDegrees);
-        TicksToWait = GetTicksToWait(s, fBaseAngularWheelSpeed);
+        TicksToWait = GetTicksToWait(s, stRobotData.fBaseAngularWheelSpeed);
         CurrentMovementState = RIGHT;
-        LOG << "Arc length " <<s<<std::endl;
-        LOG << "Ticks_To_Wait: " <<TicksToWait<<std::endl;
-        LOG << "CurrentMovementState: " <<CurrentMovementState<<std::endl;
+//        LOG << "Arc length " <<s<<std::endl;
+//        LOG << "Ticks_To_Wait: " <<TicksToWait<<std::endl;
+//        LOG << "CurrentMovementState: " <<CurrentMovementState<<std::endl;
 
     } else if(newAngleToTurnInDegrees < 0.0) {
         Real s = CalculateArcLength(newAngleToTurnInDegrees);
-        TicksToWait = GetTicksToWait(s, fBaseAngularWheelSpeed);
+        TicksToWait = GetTicksToWait(s, stRobotData.fBaseAngularWheelSpeed);
         CurrentMovementState = LEFT;
-        LOG << "Arc length " <<s<<std::endl;
-        LOG << "Ticks_To_Wait: " <<TicksToWait<<std::endl;
-        LOG << "CurrentMovementState: " <<CurrentMovementState<<std::endl;
+//        LOG << "Arc length " <<s<<std::endl;
+//        LOG << "Ticks_To_Wait: " <<TicksToWait<<std::endl;
+//        LOG << "CurrentMovementState: " <<CurrentMovementState<<std::endl;
 
     } else {
         Stop();
     }
 }
+
+//void CFootBotThesis::Reset() {
+//
+//    stRobotData.TargetPosition.Set(0,0,0);
+//    stRobotData.StartPosition.Set(0,0,0);
+//    CurrentMovementState = STOP;
+//    GoStraightAngleRangeInDegrees.Set(-37.5, 37.5);
+//    TicksPerSec = 32;
+//    TicksToWaitforSafedistance = ((2*(2*FOOTBOT_RADIUS)*TicksPerSec)/stRobotData.fLinearWheelSpeed);
+//
+//    stRobotData.TotalDistanceToTarget = 0;
+//    stRobotData.fLinearWheelSpeed = 10.0f;
+//    stRobotData.fBaseAngularWheelSpeed = 8.0f;
+//
+//
+//    stRobotData.Priority = 0;
+//
+//    stRobotData.InitialOrientation = ToRadians(CDegrees(0));
+//
+//    stRobotData.Intial_TurningWaitTime = 0;
+//    stRobotData.StopTurningTime = 0;
+//}
+
 
 /****************************************************************************/
 /* Function to set the current movement state of the robot to move forward */
@@ -293,11 +402,11 @@ void CFootBotThesis::SetRightTurn(Real newAngleToTurnInDegrees) {
 void CFootBotThesis::SetMoveForward(Real newTargetDistance) {
 
     if(newTargetDistance > 0.0) {
-        TicksToWait = GetTicksToWait(newTargetDistance, fLinearWheelSpeed);
+        TicksToWait = GetTicksToWait(newTargetDistance, stRobotData.fLinearWheelSpeed);
         CurrentMovementState = FORWARD;
 
     } else if(newTargetDistance < 0.0) {
-        TicksToWait = GetTicksToWait(newTargetDistance, fLinearWheelSpeed);
+        TicksToWait = GetTicksToWait(newTargetDistance, stRobotData.fLinearWheelSpeed);
         CurrentMovementState = BACK;
     }
     else {
@@ -311,11 +420,11 @@ void CFootBotThesis::SetMoveForward(Real newTargetDistance) {
 void CFootBotThesis::SetMoveBack(Real newTargetDistance) {
 
     if(newTargetDistance > 0.0) {
-        TicksToWait = GetTicksToWait(newTargetDistance, fLinearWheelSpeed);
+        TicksToWait = GetTicksToWait(newTargetDistance, stRobotData.fLinearWheelSpeed);
         CurrentMovementState = BACK;
 
     } else if(newTargetDistance < 0.0) {
-        TicksToWait = GetTicksToWait(newTargetDistance, fLinearWheelSpeed);
+        TicksToWait = GetTicksToWait(newTargetDistance, stRobotData.fLinearWheelSpeed);
         CurrentMovementState = FORWARD;
 
     } else {
@@ -391,24 +500,36 @@ bool CFootBotThesis::CollisionDetection() {
 
     if(GoStraightAngleRangeInDegrees.WithinMinBoundIncludedMaxBoundIncluded(collisionAngle)
        && collisionVector.Length() > 0.0) {
-
+            
         Stop();
+        
         isCollisionDetected = true;
         collision_counter++;
+        
+        
+
         while(MovementStack.size() > 0) MovementStack.pop();
-
+        
         PushMovement(FORWARD, SearchStepSize);
-
+        
+ 
+            
         if(collisionAngle <= 0.0)
         {
-            SetLeftTurn(37.5 - collisionAngle);
+            
+//            SetLeftTurn(37.5 - collisionAngle);
+            SetLeftTurn(collisionAngle);
+            
         }
         else
         {
-            SetRightTurn(37.5 + collisionAngle);
+//            SetRightTurn(37.5 + collisionAngle);
+            SetRightTurn(collisionAngle);
+            
         }
+       
     }
-
+    
     return isCollisionDetected;
 }
 
@@ -445,19 +566,26 @@ void CFootBotThesis::Move() {
 
             /* stop movement */
         case STOP: {
-
-            m_pcWheels->SetLinearVelocity(0.0, 0.0);
-            SetNextMovement();
+            if((stRobotData.StopTurningTime > 0.0))
+           {
+               Stop();
+               stRobotData.StopTurningTime--;
+           }
+            else{
+                m_pcWheels->SetLinearVelocity(0.0, 0.0);
+                SetNextMovement();
+            }
+            
             break;
         }
 
             /* turn left until the robot is facing an angle inside of the TargetAngleTolerance */
         case LEFT: {
-            LOG << "Ticks_To_Wait: " <<TicksToWait<<std::endl;
+//            LOG << "Ticks_To_Wait: " <<TicksToWait<<std::endl;
             if((TicksToWait--) <= 0.0) {
                 Stop();
             } else {
-                m_pcWheels->SetLinearVelocity(-fBaseAngularWheelSpeed, fBaseAngularWheelSpeed);
+                m_pcWheels->SetLinearVelocity(-stRobotData.fBaseAngularWheelSpeed, stRobotData.fBaseAngularWheelSpeed);
             }
             break;
         }
@@ -467,7 +595,7 @@ void CFootBotThesis::Move() {
             if((TicksToWait--) <= 0.0) {
                 Stop();
             } else {
-                m_pcWheels->SetLinearVelocity(fBaseAngularWheelSpeed, -fBaseAngularWheelSpeed);
+                m_pcWheels->SetLinearVelocity(stRobotData.fBaseAngularWheelSpeed, -stRobotData.fBaseAngularWheelSpeed);
             }
             break;
         }
@@ -477,7 +605,7 @@ void CFootBotThesis::Move() {
             if((TicksToWait--) <= 0.0) {
                 Stop();
             } else {
-                m_pcWheels->SetLinearVelocity(fLinearWheelSpeed, fLinearWheelSpeed);
+                m_pcWheels->SetLinearVelocity(stRobotData.fLinearWheelSpeed, stRobotData.fLinearWheelSpeed);
             }
             break;
         }
@@ -487,7 +615,7 @@ void CFootBotThesis::Move() {
             if((TicksToWait--) <= 0.0) {
                 Stop();
             } else {
-                m_pcWheels->SetLinearVelocity(-fLinearWheelSpeed, -fLinearWheelSpeed);
+                m_pcWheels->SetLinearVelocity(-stRobotData.fLinearWheelSpeed, -stRobotData.fLinearWheelSpeed);
             }
             break;
         }
@@ -512,10 +640,10 @@ void CFootBotThesis::SetWheelSpeeds(CRadians chead_angle) {
     Real error_atan2 = atan2(sin(error), cos(error));
 
     /* calculate angular velocity */
-    Real fBaseAngularWheelSpeed = Kp* error_atan2;
+    stRobotData.fBaseAngularWheelSpeed = Kp* error_atan2;
 
     /* Clamp the speed so that it's not greater than MaxSpeed */
-    fBaseAngularWheelSpeed = Min<Real>(fBaseAngularWheelSpeed, MaxSpeed);
+    stRobotData.fBaseAngularWheelSpeed = Min(stRobotData.fBaseAngularWheelSpeed, MaxSpeed);
 
 
 
@@ -524,16 +652,17 @@ void CFootBotThesis::SetWheelSpeeds(CRadians chead_angle) {
 
     LOG<< "fLeftWheelSpeed: "<< fLeftWheelSpeed << std::endl;
     LOG<< "fRightWheelSpeed: "<< fRightWheelSpeed << std::endl;
-    LOG<< "fBaseAngularWheelSpeed: "<< fBaseAngularWheelSpeed << std::endl;
+    LOG<< "fBaseAngularWheelSpeed: "<< stRobotData.fBaseAngularWheelSpeed << std::endl;
     LOG<< "error_atan2: "<< error_atan2 << std::endl;
 
 
-    fLeftWheelSpeed = ((2 * 1) - (fBaseAngularWheelSpeed * FOOTBOT_INTERWHEEL_DISTANCE)) / (2* FOOTBOT_RADIUS);
-    fRightWheelSpeed =((2 * 1) + (fBaseAngularWheelSpeed * FOOTBOT_INTERWHEEL_DISTANCE)) / (2* FOOTBOT_RADIUS);
+    fLeftWheelSpeed = ((2 * 1) - (stRobotData.fBaseAngularWheelSpeed * FOOTBOT_INTERWHEEL_DISTANCE)) /(2* FOOTBOT_RADIUS);
+    fRightWheelSpeed =((2 * 1) + (stRobotData.fBaseAngularWheelSpeed * FOOTBOT_INTERWHEEL_DISTANCE)) /(2* FOOTBOT_RADIUS);
 
     m_pcWheels->SetLinearVelocity(fLeftWheelSpeed, fRightWheelSpeed);
 
 }
+
 
 /****************************************/
 /****************************************/

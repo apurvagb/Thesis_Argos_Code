@@ -1018,7 +1018,7 @@ controllers/thesis_sample/preinstall:
 controllers/thesis_sample/CMakeFiles/thesis_sample.dir/all: controllers/thesis_sample/CMakeFiles/thesis_sample_autogen.dir/all
 	$(MAKE) -f controllers/thesis_sample/CMakeFiles/thesis_sample.dir/build.make controllers/thesis_sample/CMakeFiles/thesis_sample.dir/depend
 	$(MAKE) -f controllers/thesis_sample/CMakeFiles/thesis_sample.dir/build.make controllers/thesis_sample/CMakeFiles/thesis_sample.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/apurvagb/argos3-examples/build/CMakeFiles --progress-num=83,84,85 "Built target thesis_sample"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/apurvagb/argos3-examples/build/CMakeFiles --progress-num=88,89,90 "Built target thesis_sample"
 .PHONY : controllers/thesis_sample/CMakeFiles/thesis_sample.dir/all
 
 # Include target in all.
@@ -1055,7 +1055,7 @@ clean: controllers/thesis_sample/CMakeFiles/thesis_sample.dir/clean
 controllers/thesis_sample/CMakeFiles/thesis_sample_autogen.dir/all:
 	$(MAKE) -f controllers/thesis_sample/CMakeFiles/thesis_sample_autogen.dir/build.make controllers/thesis_sample/CMakeFiles/thesis_sample_autogen.dir/depend
 	$(MAKE) -f controllers/thesis_sample/CMakeFiles/thesis_sample_autogen.dir/build.make controllers/thesis_sample/CMakeFiles/thesis_sample_autogen.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/apurvagb/argos3-examples/build/CMakeFiles --progress-num=86 "Built target thesis_sample_autogen"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/apurvagb/argos3-examples/build/CMakeFiles --progress-num=91 "Built target thesis_sample_autogen"
 .PHONY : controllers/thesis_sample/CMakeFiles/thesis_sample_autogen.dir/all
 
 # Build rule for subdir invocation for target.
@@ -1090,6 +1090,7 @@ loop_functions/all: loop_functions/custom_distributions_loop_functions/all
 loop_functions/all: loop_functions/trajectory_loop_functions/all
 loop_functions/all: loop_functions/id_loop_functions/all
 loop_functions/all: loop_functions/manualcontrol_loop_functions/all
+loop_functions/all: loop_functions/thesis_loop_functions/all
 loop_functions/all: loop_functions/galib_phototaxis_loop_functions/all
 
 .PHONY : loop_functions/all
@@ -1101,6 +1102,7 @@ loop_functions/clean: loop_functions/custom_distributions_loop_functions/clean
 loop_functions/clean: loop_functions/trajectory_loop_functions/clean
 loop_functions/clean: loop_functions/id_loop_functions/clean
 loop_functions/clean: loop_functions/manualcontrol_loop_functions/clean
+loop_functions/clean: loop_functions/thesis_loop_functions/clean
 loop_functions/clean: loop_functions/galib_phototaxis_loop_functions/clean
 
 .PHONY : loop_functions/clean
@@ -1112,6 +1114,7 @@ loop_functions/preinstall: loop_functions/custom_distributions_loop_functions/pr
 loop_functions/preinstall: loop_functions/trajectory_loop_functions/preinstall
 loop_functions/preinstall: loop_functions/id_loop_functions/preinstall
 loop_functions/preinstall: loop_functions/manualcontrol_loop_functions/preinstall
+loop_functions/preinstall: loop_functions/thesis_loop_functions/preinstall
 loop_functions/preinstall: loop_functions/galib_phototaxis_loop_functions/preinstall
 
 .PHONY : loop_functions/preinstall
@@ -1482,7 +1485,7 @@ loop_functions/trajectory_loop_functions/preinstall:
 loop_functions/trajectory_loop_functions/CMakeFiles/trajectory_loop_functions.dir/all: loop_functions/trajectory_loop_functions/CMakeFiles/trajectory_loop_functions_autogen.dir/all
 	$(MAKE) -f loop_functions/trajectory_loop_functions/CMakeFiles/trajectory_loop_functions.dir/build.make loop_functions/trajectory_loop_functions/CMakeFiles/trajectory_loop_functions.dir/depend
 	$(MAKE) -f loop_functions/trajectory_loop_functions/CMakeFiles/trajectory_loop_functions.dir/build.make loop_functions/trajectory_loop_functions/CMakeFiles/trajectory_loop_functions.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/apurvagb/argos3-examples/build/CMakeFiles --progress-num=87,88,89,90 "Built target trajectory_loop_functions"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/apurvagb/argos3-examples/build/CMakeFiles --progress-num=92,93,94,95 "Built target trajectory_loop_functions"
 .PHONY : loop_functions/trajectory_loop_functions/CMakeFiles/trajectory_loop_functions.dir/all
 
 # Include target in all.
@@ -1519,7 +1522,7 @@ clean: loop_functions/trajectory_loop_functions/CMakeFiles/trajectory_loop_funct
 loop_functions/trajectory_loop_functions/CMakeFiles/trajectory_loop_functions_autogen.dir/all:
 	$(MAKE) -f loop_functions/trajectory_loop_functions/CMakeFiles/trajectory_loop_functions_autogen.dir/build.make loop_functions/trajectory_loop_functions/CMakeFiles/trajectory_loop_functions_autogen.dir/depend
 	$(MAKE) -f loop_functions/trajectory_loop_functions/CMakeFiles/trajectory_loop_functions_autogen.dir/build.make loop_functions/trajectory_loop_functions/CMakeFiles/trajectory_loop_functions_autogen.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/apurvagb/argos3-examples/build/CMakeFiles --progress-num=91 "Built target trajectory_loop_functions_autogen"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/apurvagb/argos3-examples/build/CMakeFiles --progress-num=96 "Built target trajectory_loop_functions_autogen"
 .PHONY : loop_functions/trajectory_loop_functions/CMakeFiles/trajectory_loop_functions_autogen.dir/all
 
 # Build rule for subdir invocation for target.
@@ -1655,8 +1658,8 @@ loop_functions/manualcontrol_loop_functions/preinstall:
 # Target rules for target loop_functions/manualcontrol_loop_functions/CMakeFiles/manualcontrol_loop_functions.dir
 
 # All Build rule for target.
-loop_functions/manualcontrol_loop_functions/CMakeFiles/manualcontrol_loop_functions.dir/all: loop_functions/manualcontrol_loop_functions/CMakeFiles/manualcontrol_loop_functions_autogen.dir/all
 loop_functions/manualcontrol_loop_functions/CMakeFiles/manualcontrol_loop_functions.dir/all: controllers/footbot_manualcontrol/CMakeFiles/footbot_manualcontrol.dir/all
+loop_functions/manualcontrol_loop_functions/CMakeFiles/manualcontrol_loop_functions.dir/all: loop_functions/manualcontrol_loop_functions/CMakeFiles/manualcontrol_loop_functions_autogen.dir/all
 	$(MAKE) -f loop_functions/manualcontrol_loop_functions/CMakeFiles/manualcontrol_loop_functions.dir/build.make loop_functions/manualcontrol_loop_functions/CMakeFiles/manualcontrol_loop_functions.dir/depend
 	$(MAKE) -f loop_functions/manualcontrol_loop_functions/CMakeFiles/manualcontrol_loop_functions.dir/build.make loop_functions/manualcontrol_loop_functions/CMakeFiles/manualcontrol_loop_functions.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/apurvagb/argos3-examples/build/CMakeFiles --progress-num=66,67,68 "Built target manualcontrol_loop_functions"
@@ -1722,6 +1725,95 @@ clean: loop_functions/manualcontrol_loop_functions/CMakeFiles/manualcontrol_loop
 .PHONY : clean
 
 #=============================================================================
+# Directory level rules for directory loop_functions/thesis_loop_functions
+
+# Convenience name for "all" pass in the directory.
+loop_functions/thesis_loop_functions/all: loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/all
+
+.PHONY : loop_functions/thesis_loop_functions/all
+
+# Convenience name for "clean" pass in the directory.
+loop_functions/thesis_loop_functions/clean: loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/clean
+loop_functions/thesis_loop_functions/clean: loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions_autogen.dir/clean
+
+.PHONY : loop_functions/thesis_loop_functions/clean
+
+# Convenience name for "preinstall" pass in the directory.
+loop_functions/thesis_loop_functions/preinstall:
+
+.PHONY : loop_functions/thesis_loop_functions/preinstall
+
+#=============================================================================
+# Target rules for target loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir
+
+# All Build rule for target.
+loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/all: controllers/thesis_sample/CMakeFiles/thesis_sample.dir/all
+loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/all: loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions_autogen.dir/all
+	$(MAKE) -f loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/build.make loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/depend
+	$(MAKE) -f loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/build.make loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/apurvagb/argos3-examples/build/CMakeFiles --progress-num=83,84,85,86 "Built target thesis_loop_functions"
+.PHONY : loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/all
+
+# Include target in all.
+all: loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/all
+
+.PHONY : all
+
+# Build rule for subdir invocation for target.
+loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/apurvagb/argos3-examples/build/CMakeFiles 9
+	$(MAKE) -f CMakeFiles/Makefile2 loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/apurvagb/argos3-examples/build/CMakeFiles 0
+.PHONY : loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/rule
+
+# Convenience name for target.
+thesis_loop_functions: loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/rule
+
+.PHONY : thesis_loop_functions
+
+# clean rule for target.
+loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/clean:
+	$(MAKE) -f loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/build.make loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/clean
+.PHONY : loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/clean
+
+# clean rule for target.
+clean: loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
+# Target rules for target loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions_autogen.dir
+
+# All Build rule for target.
+loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions_autogen.dir/all: controllers/thesis_sample/CMakeFiles/thesis_sample.dir/all
+	$(MAKE) -f loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions_autogen.dir/build.make loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions_autogen.dir/depend
+	$(MAKE) -f loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions_autogen.dir/build.make loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions_autogen.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/apurvagb/argos3-examples/build/CMakeFiles --progress-num=87 "Built target thesis_loop_functions_autogen"
+.PHONY : loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions_autogen.dir/all
+
+# Build rule for subdir invocation for target.
+loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions_autogen.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/apurvagb/argos3-examples/build/CMakeFiles 5
+	$(MAKE) -f CMakeFiles/Makefile2 loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions_autogen.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/apurvagb/argos3-examples/build/CMakeFiles 0
+.PHONY : loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions_autogen.dir/rule
+
+# Convenience name for target.
+thesis_loop_functions_autogen: loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions_autogen.dir/rule
+
+.PHONY : thesis_loop_functions_autogen
+
+# clean rule for target.
+loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions_autogen.dir/clean:
+	$(MAKE) -f loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions_autogen.dir/build.make loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions_autogen.dir/clean
+.PHONY : loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions_autogen.dir/clean
+
+# clean rule for target.
+clean: loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions_autogen.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
 # Directory level rules for directory loop_functions/galib_phototaxis_loop_functions
 
 # Convenience name for "all" pass in the directory.
@@ -1744,8 +1836,8 @@ loop_functions/galib_phototaxis_loop_functions/preinstall:
 # Target rules for target loop_functions/galib_phototaxis_loop_functions/CMakeFiles/galib_phototaxis_loop_functions.dir
 
 # All Build rule for target.
-loop_functions/galib_phototaxis_loop_functions/CMakeFiles/galib_phototaxis_loop_functions.dir/all: loop_functions/galib_phototaxis_loop_functions/CMakeFiles/galib_phototaxis_loop_functions_autogen.dir/all
 loop_functions/galib_phototaxis_loop_functions/CMakeFiles/galib_phototaxis_loop_functions.dir/all: controllers/footbot_nn/CMakeFiles/footbot_nn.dir/all
+loop_functions/galib_phototaxis_loop_functions/CMakeFiles/galib_phototaxis_loop_functions.dir/all: loop_functions/galib_phototaxis_loop_functions/CMakeFiles/galib_phototaxis_loop_functions_autogen.dir/all
 	$(MAKE) -f loop_functions/galib_phototaxis_loop_functions/CMakeFiles/galib_phototaxis_loop_functions.dir/build.make loop_functions/galib_phototaxis_loop_functions/CMakeFiles/galib_phototaxis_loop_functions.dir/depend
 	$(MAKE) -f loop_functions/galib_phototaxis_loop_functions/CMakeFiles/galib_phototaxis_loop_functions.dir/build.make loop_functions/galib_phototaxis_loop_functions/CMakeFiles/galib_phototaxis_loop_functions.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/apurvagb/argos3-examples/build/CMakeFiles --progress-num=58,59,60 "Built target galib_phototaxis_loop_functions"

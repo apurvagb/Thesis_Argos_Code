@@ -579,6 +579,32 @@ manualcontrol_loop_functions_autogen/fast:
 .PHONY : manualcontrol_loop_functions_autogen/fast
 
 #=============================================================================
+# Target rules for targets named thesis_loop_functions
+
+# Build rule for target.
+thesis_loop_functions: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 thesis_loop_functions
+.PHONY : thesis_loop_functions
+
+# fast build rule for target.
+thesis_loop_functions/fast:
+	$(MAKE) -f loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/build.make loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/build
+.PHONY : thesis_loop_functions/fast
+
+#=============================================================================
+# Target rules for targets named thesis_loop_functions_autogen
+
+# Build rule for target.
+thesis_loop_functions_autogen: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 thesis_loop_functions_autogen
+.PHONY : thesis_loop_functions_autogen
+
+# fast build rule for target.
+thesis_loop_functions_autogen/fast:
+	$(MAKE) -f loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions_autogen.dir/build.make loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions_autogen.dir/build
+.PHONY : thesis_loop_functions_autogen/fast
+
+#=============================================================================
 # Target rules for targets named galib_phototaxis_loop_functions
 
 # Build rule for target.
@@ -700,6 +726,8 @@ help:
 	@echo "... id_loop_functions_autogen"
 	@echo "... manualcontrol_loop_functions"
 	@echo "... manualcontrol_loop_functions_autogen"
+	@echo "... thesis_loop_functions"
+	@echo "... thesis_loop_functions_autogen"
 	@echo "... galib_phototaxis_loop_functions"
 	@echo "... galib_phototaxis_loop_functions_autogen"
 	@echo "... mpga_phototaxis"

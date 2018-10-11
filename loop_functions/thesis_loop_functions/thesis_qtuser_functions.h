@@ -1,20 +1,20 @@
-#ifndef TRAJECTORY_QTUSER_FUNCTIONS_H
-#define TRAJECTORY_QTUSER_FUNCTIONS_H
+#ifndef THESIS_QTUSER_FUNCTIONS_H
+#define THESIS_QTUSER_FUNCTIONS_H
 
 #include <argos3/plugins/simulator/visualizations/qt-opengl/qtopengl_user_functions.h>
 #include <argos3/plugins/robots/foot-bot/simulator/footbot_entity.h>
 
 using namespace argos;
 
-class CTrajectoryLoopFunctions;
+class CThesisLoopFunctions;
 
-class CTrajectoryQTUserFunctions : public CQTOpenGLUserFunctions {
+class CThesisQTUserFunctions : public CQTOpenGLUserFunctions {
 
 public:
 
-   CTrajectoryQTUserFunctions();
+   CThesisQTUserFunctions();
 
-   virtual ~CTrajectoryQTUserFunctions() {}
+   virtual ~CThesisQTUserFunctions() {}
 
    virtual void DrawInWorld();
 
@@ -24,7 +24,7 @@ private:
 
 private:
 
-   CTrajectoryLoopFunctions& m_cTrajLF;
+   CThesisLoopFunctions& m_cTrajLF;
 
 };
 

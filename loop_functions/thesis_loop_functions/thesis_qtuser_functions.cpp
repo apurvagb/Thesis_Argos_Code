@@ -4,16 +4,16 @@
 /****************************************/
 /****************************************/
 
-CTrajectoryQTUserFunctions::CTrajectoryQTUserFunctions() :
-   m_cTrajLF(dynamic_cast<CTrajectoryLoopFunctions&>(CSimulator::GetInstance().GetLoopFunctions())) {
+CThesisQTUserFunctions::CThesisQTUserFunctions() :
+   m_cTrajLF(dynamic_cast<CThesisLoopFunctions&>(CSimulator::GetInstance().GetLoopFunctions())) {
 }
 
 /****************************************/
 /****************************************/
 
-void CTrajectoryQTUserFunctions::DrawInWorld() {
+void CThesisQTUserFunctions::DrawInWorld() {
    /* Go through all the robot waypoints and draw them */
-   for(CTrajectoryLoopFunctions::TWaypointMap::const_iterator it = m_cTrajLF.GetWaypoints().begin();
+   for(CThesisLoopFunctions::TWaypointMap::const_iterator it = m_cTrajLF.GetWaypoints().begin();
        it != m_cTrajLF.GetWaypoints().end();
        ++it) {
       DrawWaypoints(it->second);
@@ -23,7 +23,7 @@ void CTrajectoryQTUserFunctions::DrawInWorld() {
 /****************************************/
 /****************************************/
 
-void CTrajectoryQTUserFunctions::DrawWaypoints(const std::vector<CVector3>& c_waypoints) {
+void CThesisQTUserFunctions::DrawWaypoints(const std::vector<CVector3>& c_waypoints) {
    /* Start drawing segments when you have at least two points */
    if(c_waypoints.size() > 1) {
       size_t unStart = 0;
@@ -40,4 +40,4 @@ void CTrajectoryQTUserFunctions::DrawWaypoints(const std::vector<CVector3>& c_wa
 /****************************************/
 /****************************************/
 
-REGISTER_QTOPENGL_USER_FUNCTIONS(CTrajectoryQTUserFunctions, "trajectory_qtuser_functions")
+REGISTER_QTOPENGL_USER_FUNCTIONS(CThesisQTUserFunctions, "thesis_qtuser_functions")

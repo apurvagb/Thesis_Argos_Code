@@ -40,6 +40,7 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/Users/apurvagb/argos3-examples/build/loop_functions/trajectory_loop_functions/cmake_install.cmake")
   include("/Users/apurvagb/argos3-examples/build/loop_functions/id_loop_functions/cmake_install.cmake")
   include("/Users/apurvagb/argos3-examples/build/loop_functions/manualcontrol_loop_functions/cmake_install.cmake")
+  include("/Users/apurvagb/argos3-examples/build/loop_functions/thesis_loop_functions/cmake_install.cmake")
   include("/Users/apurvagb/argos3-examples/build/loop_functions/galib_phototaxis_loop_functions/cmake_install.cmake")
 
 endif()

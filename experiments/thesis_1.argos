@@ -34,26 +34,26 @@
   <!-- ****************** -->
   <!-- * Loop functions * -->
   <!-- ****************** -->
-  <!--<loop_functions library="build/loop_functions/trajectory_loop_functions/libtrajectory_loop_functions"
-  label="trajectory_loop_functions" />-->
+  <loop_functions library="build/loop_functions/thesis_loop_functions/libthesis_loop_functions"
+  label="thesis_loop_functions" />
 
   <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
   <arena size="5, 5, 1" center="0,0,0.5">
-
-    <box id="wall_north" size="4,0.1,0.5" movable="false">
-      <body position="0,2,0" orientation="0,0,0" />
-    </box>
-    <box id="wall_south" size="4,0.1,0.5" movable="false">
-      <body position="0,-2,0" orientation="0,0,0" />
-    </box>
-    <box id="wall_east" size="0.1,4,0.5" movable="false">
-      <body position="2,0,0" orientation="0,0,0" />
-    </box>
-    <box id="wall_west" size="0.1,4,0.5" movable="false">
-      <body position="-2,0,0" orientation="0,0,0" />
-    </box>
+      
+      <box id="wall_north" size="4,0.1,0.5" movable="false">
+          <body position="0,2,0" orientation="0,0,0" />
+      </box>
+      <box id="wall_south" size="4,0.1,0.5" movable="false">
+          <body position="0,-2,0" orientation="0,0,0" />
+      </box>
+      <box id="wall_east" size="0.1,4,0.5" movable="false">
+          <body position="2,0,0" orientation="0,0,0" />
+      </box>
+      <box id="wall_west" size="0.1,4,0.5" movable="false">
+          <body position="-2,0,0" orientation="0,0,0" />
+      </box>
 
     <!--
         You can distribute entities randomly. Here, we distribute
@@ -64,20 +64,20 @@
         from a gaussian distribution, whose mean is zero degrees and
         standard deviation is 360 degrees.
     -->
-<!--    <distribute>-->
-<!--      <position method="uniform" min="-2,-2,0" max="2,2,0" />-->
-<!--      <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />-->
-<!--      <entity quantity="1" max_trials="100">-->
-<!--        <foot-bot id="fb">-->
-<!--          <controller config="fdc" />-->
-<!--        </foot-bot>-->
-<!--      </entity>-->
-<!--    </distribute>-->
+    <distribute>
+      <position method="uniform" min="-2,-2,0" max="2,2,0" />
+      <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
+      <entity quantity="3" max_trials="100">
+        <foot-bot id="fb">
+          <controller config="fdc" />
+        </foot-bot>
+      </entity>
+    </distribute>
 <!-- Place a foot-bot in the origin and bind it to the controller -->
-<foot-bot id="fb_0">
-    <body position="-1,0.5,0" orientation="0,0,0" />
-    <controller config="fdc"/>
-</foot-bot>
+<!--<foot-bot id="fb_0">-->
+<!--    <body position="0,0.5,0" orientation="0,0,0" />-->
+<!--    <controller config="fdc"/>-->
+<!--</foot-bot>-->
 
   </arena>
 
@@ -96,20 +96,17 @@
 <!-- ****************** -->
 <!-- * Visualization * -->
 <!-- ****************** -->
-<visualization>
-    <qt-opengl />
-</visualization>
 
-<!--<visualization>-->
-<!--    <!---->
-<!--     This shows how to add customized drawing in the world-->
-<!--     using the qt user functions.-->
-<!--     Check 'argos3 -q qt-opengl' for more help.-->
-<!--     -->-->
-<!--    <qt-opengl>-->
-<!--        <user_functions library="build/loop_functions/trajectory_loop_functions/libtrajectory_loop_functions"-->
-<!--        label="trajectory_qtuser_functions" />-->
-<!--    </qt-opengl>-->
-<!--</visualization>-->
+<visualization>
+    <!--
+     This shows how to add customized drawing in the world
+     using the qt user functions.
+     Check 'argos3 -q qt-opengl' for more help.
+     -->
+    <qt-opengl>
+        <user_functions library="build/loop_functions/thesis_loop_functions/libthesis_loop_functions"
+        label="thesis_qtuser_functions" />
+    </qt-opengl>
+</visualization>
 
 </argos-configuration>

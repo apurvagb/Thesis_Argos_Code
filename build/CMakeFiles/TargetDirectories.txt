@@ -74,6 +74,10 @@
 /Users/apurvagb/argos3-examples/build/loop_functions/manualcontrol_loop_functions/CMakeFiles/edit_cache.dir
 /Users/apurvagb/argos3-examples/build/loop_functions/manualcontrol_loop_functions/CMakeFiles/manualcontrol_loop_functions.dir
 /Users/apurvagb/argos3-examples/build/loop_functions/manualcontrol_loop_functions/CMakeFiles/manualcontrol_loop_functions_autogen.dir
+/Users/apurvagb/argos3-examples/build/loop_functions/thesis_loop_functions/CMakeFiles/rebuild_cache.dir
+/Users/apurvagb/argos3-examples/build/loop_functions/thesis_loop_functions/CMakeFiles/edit_cache.dir
+/Users/apurvagb/argos3-examples/build/loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir
+/Users/apurvagb/argos3-examples/build/loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions_autogen.dir
 /Users/apurvagb/argos3-examples/build/loop_functions/galib_phototaxis_loop_functions/CMakeFiles/rebuild_cache.dir
 /Users/apurvagb/argos3-examples/build/loop_functions/galib_phototaxis_loop_functions/CMakeFiles/edit_cache.dir
 /Users/apurvagb/argos3-examples/build/loop_functions/galib_phototaxis_loop_functions/CMakeFiles/galib_phototaxis_loop_functions.dir
