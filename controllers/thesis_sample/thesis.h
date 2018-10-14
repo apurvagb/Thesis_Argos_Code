@@ -53,7 +53,7 @@ class CFootBotThesis : public CCI_Controller {
 
 public:
     
-    Real Rover_Goal_X[5] = {1, 1.5, 0, 0, -1};
+    Real Rover_Goal_X[5] = {1, -1.5, 0, 0, -1};
     Real Rover_Goal_Y[5] = {1, -1, 0, 0, 1};
     
     
@@ -99,8 +99,11 @@ public:
     struct RobotData{
         CVector3 TargetPosition;
         CVector3 StartPosition;
+        CVector3 TargetWaypoint;
+        CVector3 StartWaypoint;
         UInt16 id_robot;
         UInt16 Priority;
+        UInt16 WaypointCounter;
         Real fBaseAngularWheelSpeed;
         Real fLinearWheelSpeed;
         bool GoingToNest;
@@ -109,6 +112,9 @@ public:
         UInt16 Intial_TurningWaitTime;
         UInt16 StopTurningTime;
         Real dist;
+        bool Checked;
+        bool Waypoint_Added;
+        bool WaypointReached;
         std::stack<CVector3>WaypointStack;
     };
     
@@ -233,6 +239,8 @@ private:
     
    /* Maximum wheel speed */
    Real MaxSpeed;
+   CVector2 collisionVector;
+   Real collisionAngle;
     
    const Real Kp                               = 5;
    const Real FOOTBOT_RADIUS                   = 0.085036758f;

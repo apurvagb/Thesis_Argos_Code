@@ -38,7 +38,7 @@ public:
    UInt16 GetTicksToWait(Real dist, Real speed);
 
    void IntersectionCollisionCheck(CFootBotThesis::RobotData& ptr1, CFootBotThesis::RobotData &ptr2,
-                                    CFootBotThesis::IntersectionData &ptr3);
+                                   CFootBotThesis::IntersectionData &ptr3);
 
    void SetPriority(CFootBotThesis::RobotData& ptr1, CFootBotThesis::RobotData &ptr2);
     
@@ -46,18 +46,30 @@ public:
     
    void CheckRobotPlacement(CFootBotThesis::RobotData& ptr1, CFootBotThesis::RobotData &ptr2);
     
-   void collinear(CFootBotThesis::RobotData& ptr1, CFootBotThesis::RobotData &ptr2);
+   void CheckCollinearity(CFootBotThesis::RobotData& ptr1, CFootBotThesis::RobotData &ptr2);
+    
+   void CheckRobotHeadingCourse(CFootBotThesis::RobotData& ptr1, CFootBotThesis::RobotData &ptr2,
+                                CFootBotThesis::IntersectionData &ptr3);
+    
+   Real CalculateAngleBetweenRobotCourse(CFootBotThesis::RobotData& ptr1, CFootBotThesis::RobotData &ptr2);
+    
+   void DistanceBetweenCourse(CFootBotThesis::RobotData& ptr1, CFootBotThesis::RobotData &ptr2);
     
 
 private:
     
-    bool Done_flag;
+    bool RobotReachedWayPoint;
     UInt16 SimulatorTicksperSec;
     const Real FOOTBOT_RADIUS                   = 0.085036758f;
     const Real FOOTBOT_INTERWHEEL_DISTANCE      = 0.14f;
-    const Real Safedistance = (2 * FOOTBOT_RADIUS);
+    const Real Safedistance = 0.5;
     const Real MaxLinearSpeed = 10.0f;
     const Real Robot_Gap_Distance = 0.5f;
+    const UInt16 MaximumWaypoint = 5;
+    const Real OverlappingCourseAngle = 20.0f;
+    bool FirstCheck;
+
+
 };
 
 #endif

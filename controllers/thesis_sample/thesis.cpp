@@ -81,23 +81,28 @@ void CFootBotThesis::Init(TConfigurationNode& t_node) {
     CurrentMovementState = STOP;
     GoStraightAngleRangeInDegrees.Set(-37.5, 37.5);
     TicksPerSec = 32;
-    TicksToWaitforSafedistance = ((2*(2*FOOTBOT_RADIUS)*TicksPerSec)/stRobotData.fLinearWheelSpeed);
+
     m_cPosition = m_pcPosSens->GetReading().Position;
     
     stRobotData.StartPosition = m_cPosition;
-    stRobotData.TotalDistanceToTarget = CalculateTargetDistance(m_cPosition, stRobotData.TargetPosition);
+    stRobotData.StartWaypoint = stRobotData.StartPosition;
+    
+//    stRobotData.TotalDistanceToTarget = CalculateTargetDistance(m_cPosition, stRobotData.TargetPosition);
     stRobotData.fLinearWheelSpeed = 10.0f;
     stRobotData.fBaseAngularWheelSpeed = 8.0f;
     
    
     stRobotData.Priority = stRobotData.id_robot;
     
-    stRobotData.InitialOrientation = GetHeadingAngle();
+//    stRobotData.InitialOrientation = GetHeadingAngle();
     
     stRobotData.Intial_TurningWaitTime = GetInitial_TurningWaitTime(stRobotData);
     
-    CurrentWayPoint = stRobotData.WaypointStack.top();
-    stRobotData.WaypointStack.pop();
+//    CurrentWayPoint = stRobotData.WaypointStack.top();
+    stRobotData.TargetWaypoint = stRobotData.TargetPosition;
+//    stRobotData.WaypointStack.pop();
+    stRobotData.WaypointCounter = 0;
+    stRobotData.Checked = 0;
 }
 
 /************************************************/
@@ -120,16 +125,38 @@ std::string CFootBotThesis::extractID(std::string str)
 /* Control Step */
 /****************************************/
 void CFootBotThesis::ControlStep() {
-
-
-    LOG<<"RobotID: "<<stRobotData.id_robot<<std::endl;
-    LOG<<"Initial Turning Time: "<<stRobotData.Intial_TurningWaitTime<<std::endl;
-    LOG<<"Priority: "<<stRobotData.Priority<<std::endl;
-    LOG<<"Stop Turning Time: "<<stRobotData.StopTurningTime<<std::endl;
-    LOG<<"Distance between robot: "<<stRobotData.dist<<std::endl;
-    LOG<<"velocity: "<<stRobotData.fLinearWheelSpeed<<std::endl;
     
-    Move();
+    if(stRobotData.id_robot == 0 or stRobotData.id_robot == 1)
+    {
+        LOG<<"RobotID: "<<stRobotData.id_robot<<std::endl;
+        LOG<<"Waypoint Start: "<<stRobotData.StartWaypoint<<std::endl;
+        LOG<<"Waypoint End: "<<stRobotData.TargetWaypoint<<std::endl;
+//        LOG<<"Waypoint added flag: "<<stRobotData.WaypointReached<<std::endl;
+//        LOG<<"Checked flag: "<<stRobotData.Checked<<std::endl;
+//        LOG<<"Heading Angle: "<<stRobotData.InitialOrientation<<std::endl;
+        LOG<<"Collision length: "<<collisionVector.Length()<<std::endl;
+        LOG<<"Collision length: "<<collisionAngle<<std::endl;
+//        LOG<<"Stop Time: "<<stRobotData.StopTurningTime<<std::endl;
+//        LOG<<"Waypoint Stack Size: "<<stRobotData.WaypointStack.size()<<std::endl;
+//        LOG<<"Time To intersection: "<<stRobotData.dist<<std::endl;
+//
+//        LOG<<"Intersection robot: "<<st_IntersectionData.Robot_ID_Intersectingwith<<std::endl;
+//        LOG<<"Intersection point: "<<st_IntersectionData.IntersectionPoint<<std::endl;
+//        LOG<<"Current Movement State: "<<CurrentMovementState<<std::endl;
+//        LOG<<"Initial Turning Wait time: "<<stRobotData.Intial_TurningWaitTime<<std::endl;
+        LOG<<"Veocity: "<<stRobotData.fLinearWheelSpeed<<std::endl;
+
+//        LOG<<"Stack: "<<stRobotData.WaypointStack.top()<<std::endl;
+//        LOG<<"Initial Turning Time: "<<stRobotData.Intial_TurningWaitTime<<std::endl;
+//        LOG<<"Priority: "<<stRobotData.Priority<<std::endl;
+//        LOG<<"Stop Turning Time: "<<stRobotData.StopTurningTime<<std::endl;
+//        LOG<<"Distance between robot: "<<stRobotData.dist<<std::endl;
+//        LOG<<"velocity: "<<stRobotData.fLinearWheelSpeed<<std::endl;
+    }
+    if(stRobotData.Checked == 1)
+    {
+        Move();
+    }
     
 }
 
@@ -175,16 +202,17 @@ Real CFootBotThesis::CalculateTargetDistance(CVector3 cPosition, CVector3 Target
 UInt16 CFootBotThesis::GetInitial_TurningWaitTime(CFootBotThesis::RobotData stRobotData){
 
     UInt16 TicksToWaitToTurn;
+    CRadians orientation;
     Real newAngleToTurnInDegrees, s;
 
     /* get the heading angle towards goal */
     
 //    CRadians headingToTarget = (stRobotData.TargetPosition - stRobotData.StartPosition).GetZAngle();
-    CRadians headingToTarget = (CurrentWayPoint - stRobotData.StartPosition).GetZAngle();
+    CRadians headingToTarget = (stRobotData.TargetWaypoint - stRobotData.StartWaypoint).GetZAngle();
     
-    
+    orientation = GetHeadingAngle();
     /* get the current heading angle of the robot */
-    CRadians headingToTargetError = (stRobotData.InitialOrientation - headingToTarget).SignedNormalize();
+    CRadians headingToTargetError = (orientation - headingToTarget).SignedNormalize();
     
     /* turn left */
     if(headingToTargetError > TargetAngleTolerance)
@@ -248,7 +276,7 @@ bool CFootBotThesis::IsAtTarget()
 
 //    Real distanceToTarget = (stRobotData.TargetPosition - GetPosition()).Length();
     
-    Real distanceToTarget = (CurrentWayPoint - GetPosition()).Length();
+    Real distanceToTarget = (stRobotData.TargetWaypoint - GetPosition()).Length();
 
     return (distanceToTarget < DistTol) ? (true) : (false);
 }
@@ -268,15 +296,15 @@ void CFootBotThesis::SetNextMovement()
     /* if the movement stack is empty and movement state is STOP */
     if(MovementStack.size() == 0 && CurrentMovementState == STOP) {
         
-            
+        stRobotData.WaypointReached = false;
         /* get the distance between current point and goal point */
 //        Real distanceToTarget = (stRobotData.TargetPosition - GetPosition()).Length();
-        Real distanceToTarget = (CurrentWayPoint - GetPosition()).Length();
+        Real distanceToTarget = (stRobotData.TargetWaypoint - GetPosition()).Length();
         
         /* get the heading angle towards goal */
 //        CRadians headingToTarget = (stRobotData.TargetPosition - GetPosition()).GetZAngle();
-        CRadians headingToTarget = (CurrentWayPoint - GetPosition()).GetZAngle();
-
+        CRadians headingToTarget = (stRobotData.TargetWaypoint - GetPosition()).GetZAngle();
+        stRobotData.InitialOrientation = headingToTarget;
         /* get the current heading angle of the robot */
         CRadians headingToTargetError = (GetHeadingAngle() - headingToTarget).SignedNormalize();
 
@@ -303,17 +331,28 @@ void CFootBotThesis::SetNextMovement()
         else {
             
 //            PushMovement(STOP, 0.0);
+
             
             /* get the next waypoint unless the stack is empty */
             if(!stRobotData.WaypointStack.empty())
             {
-                CurrentWayPoint = stRobotData.WaypointStack.top();
-                stRobotData.WaypointStack.pop();
+//                CurrentWayPoint = stRobotData.WaypointStack.top();
+//                stRobotData.WaypointStack.pop();
+//                stRobotData.TargetWaypoint = CurrentWayPoint;
+                stRobotData.WaypointReached = true;
+                stRobotData.Checked = 0;
+                stRobotData.StartWaypoint = stRobotData.TargetWaypoint;
+                stRobotData.Intial_TurningWaitTime = 0;
+                stRobotData.StopTurningTime = 0;
+                stRobotData.Intial_TurningWaitTime = GetInitial_TurningWaitTime(stRobotData);
+                
                 CurrentMovementState = STOP;
             }
             /* if stack is empty, robot has reached the target */
             else{
+                
                 PushMovement(STOP, 0.0);
+                stRobotData.WaypointReached = false;
             }
         }
        
@@ -494,8 +533,13 @@ void CFootBotThesis::PopMovement() {
 /********************************************************************/
 bool CFootBotThesis::CollisionDetection() {
 
-    argos::CVector2 collisionVector = GetCollisionVector();
-    argos::Real collisionAngle = ToDegrees(collisionVector.Angle()).GetValue();
+    Real output;
+    Real min = 10;
+    Real max = 30;
+//    argos::CVector2 collisionVector = GetCollisionVector();
+    collisionVector = GetCollisionVector();
+//    argos::Real collisionAngle = ToDegrees(collisionVector.Angle()).GetValue();
+    collisionAngle = ToDegrees(collisionVector.Angle()).GetValue();
     bool isCollisionDetected = false;
 
     if(GoStraightAngleRangeInDegrees.WithinMinBoundIncludedMaxBoundIncluded(collisionAngle)
@@ -512,20 +556,18 @@ bool CFootBotThesis::CollisionDetection() {
         
         PushMovement(FORWARD, SearchStepSize);
         
- 
-            
+        output = min + (rand() % static_cast<int>(max - min + 1));
         if(collisionAngle <= 0.0)
         {
-            
-//            SetLeftTurn(37.5 - collisionAngle);
-            SetLeftTurn(collisionAngle);
+            SetLeftTurn(collisionAngle + 180);
+//            SetLeftTurn(37.5 - (collisionAngle + output));
+//            SetLeftTurn(37.5 + (collisionAngle + output));
             
         }
         else
         {
-//            SetRightTurn(37.5 + collisionAngle);
-            SetRightTurn(collisionAngle);
-            
+            SetRightTurn(collisionAngle + 180);
+//            SetRightTurn(37.5 + (collisionAngle + output));
         }
        
     }
