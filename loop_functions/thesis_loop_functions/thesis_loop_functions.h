@@ -46,7 +46,8 @@ public:
     
    void CheckRobotPlacement(CFootBotThesis::RobotData& ptr1, CFootBotThesis::RobotData &ptr2);
     
-   void CheckCollinearity(CFootBotThesis::RobotData& ptr1, CFootBotThesis::RobotData &ptr2);
+//   void CheckCollinearity(CFootBotThesis::RobotData& ptr1, CFootBotThesis::RobotData &ptr2);
+   void CheckCollinearity(CFootBotThesis::RobotData& ptr1, CFootBotThesis::RobotData         &ptr2, CFootBotThesis::IntersectionData &ptr3);
     
    void CheckRobotHeadingCourse(CFootBotThesis::RobotData& ptr1, CFootBotThesis::RobotData &ptr2,
                                 CFootBotThesis::IntersectionData &ptr3);
@@ -55,10 +56,12 @@ public:
     
    void DistanceBetweenCourse(CFootBotThesis::RobotData& ptr1, CFootBotThesis::RobotData &ptr2);
     
-
+   void AddNewWayPoint(CFootBotThesis::RobotData& ptr1, CFootBotThesis::RobotData &ptr2, UInt8 ptrIndex);
+    
 private:
     
     bool RobotReachedWayPoint;
+    bool NewWayPointAdded;
     UInt16 SimulatorTicksperSec;
     const Real FOOTBOT_RADIUS                   = 0.085036758f;
     const Real FOOTBOT_INTERWHEEL_DISTANCE      = 0.14f;
@@ -66,8 +69,13 @@ private:
     const Real MaxLinearSpeed = 10.0f;
     const Real Robot_Gap_Distance = 0.5f;
     const UInt16 MaximumWaypoint = 5;
-    const Real OverlappingCourseAngle = 20.0f;
+    const Real OverlappingCourseAngle = 25.0f;
     bool FirstCheck;
+    CVector3 TargetPosition[50];
+    UInt16 WaitCounter;
+    bool CollinearFlag;
+    
+
 
 
 };

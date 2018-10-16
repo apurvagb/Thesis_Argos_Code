@@ -39,7 +39,9 @@ void CThesisLoopFunctions::Init(TConfigurationNode& t_tree) {
    }
     SimulatorTicksperSec = 32;
     RobotReachedWayPoint = 0;
+    WaitCounter = 0;
     FirstCheck = 1;
+    CollinearFlag = 0;
 }
 
 /****************************************/
@@ -64,7 +66,10 @@ void CThesisLoopFunctions::Reset() {
       m_tWaypoints[pcFB].push_back(pcFB->GetEmbodiedEntity().GetOriginAnchor().Position);
    }
     RobotReachedWayPoint = 0;
+    WaitCounter = 0;
+    NewWayPointAdded = 0;
     FirstCheck = 1;
+    CollinearFlag = 0;
 }
 
 /****************************************/
@@ -90,6 +95,7 @@ void CThesisLoopFunctions::PostStep() {
 /****************************************/
 void CThesisLoopFunctions::PreStep() {
     UInt16 counter = 0;
+    Real RobotCourseAngle;
     
     CSpace::TMapPerType& m_cFootbots = GetSpace().GetEntitiesByType("foot-bot");
     
@@ -104,9 +110,45 @@ void CThesisLoopFunctions::PreStep() {
         
         CFootBotThesis::RobotData& stRobotDataCopy = cController2.GetRobotData();
         RobotReachedWayPoint |= stRobotDataCopy.WaypointReached;
+        NewWayPointAdded |= stRobotDataCopy.WaypointReached;
+//        CollinearFlag|= stRobotDataCopy.CollinearFlag;
+        
     }
     
-    if(RobotReachedWayPoint == 1 or FirstCheck == 1)
+//    if(CollinearFlag == 0)
+//    {
+//        /* Get the hadndle to each robot */
+//        for(CSpace::TMapPerType::iterator it = m_cFootbots.begin();
+//            it != m_cFootbots.end();
+//            ++it)
+//        {
+//            /* Get handle to foot-bot entity and controller of the current robot */
+//            CFootBotEntity& cFootBot = *any_cast<CFootBotEntity*>(it->second);
+//            CFootBotThesis& cController = dynamic_cast<CFootBotThesis&>(cFootBot.GetControllableEntity().GetController());
+//
+//            CFootBotThesis::RobotData& sRobotData1 = cController.GetRobotData();
+//
+//            /* Get the hadndle to each next robot */
+//            for(CSpace::TMapPerType::iterator it1 = std::next(it, 1);
+//                it1 != m_cFootbots.end();
+//                ++it1)
+//
+//            {
+//
+//                CFootBotEntity& cFootBot1 = *any_cast<CFootBotEntity*>(it1->second);
+//                CFootBotThesis& cController1 = dynamic_cast<CFootBotThesis&>(cFootBot1.GetControllableEntity().GetController());
+//
+//                CFootBotThesis::RobotData& sRobotData2 = cController1.GetRobotData();
+//                CFootBotThesis::IntersectionData& sIntersectionData1= cController1.GetIntersectionData();
+//
+//                /* check if two robot courses are close */
+//                CheckRobotHeadingCourse(sRobotData1, sRobotData2, sIntersectionData1);
+//
+//            }
+//        }
+//    }
+    
+    if(RobotReachedWayPoint == 1 or FirstCheck == 1 or NewWayPointAdded == 1)
     {
     
         /* Get the hadndle to each robot */
@@ -138,46 +180,71 @@ void CThesisLoopFunctions::PreStep() {
                 
 
                 /* check if robot's end waypoint is collinear in other robot's start and end waypoint */
-                CheckCollinearity(sRobotDataprevious, sRobotDatanext);
+                CheckCollinearity(sRobotDataprevious, sRobotDatanext, sIntersectionDatanext);
                 
+                /* find the angle between lines */
+//                RobotCourseAngle = CalculateAngleBetweenRobotCourse(sRobotDataprevious, sRobotDataprevious);
+//                LOG<<"Course Angle Robot: "<<RobotCourseAngle<<std::endl;
                 /* check if robot's end waypoint is closer to robot course  */
 //                    DistanceBetweenCourse(sRobotDataprevious, sRobotDatanext);
                 
                 /* check if heading course of two robots is very close  */
 //                CheckRobotHeadingCourse(sRobotDataprevious, sRobotDatanext, sIntersectionDatanext);
                 
-                /* check if two robot's start points are close */
-                CheckRobotPlacement(sRobotDataprevious, sRobotDatanext);
+//                /* check if two robot's start points are close */
+//                CheckRobotPlacement(sRobotDataprevious, sRobotDatanext);
                 
-                /* set the priority of the robot */
-//                SetPriority(sRobotDataprevious, sRobotDatanext);
                 
-                /* find intersection between paths of robots */
-                Find_Intersection(sRobotDataprevious, sRobotDatanext, sIntersectionDatanext);
+                if(sRobotDataprevious.CollinearFlag !=1)
+                {
+                    /* find intersection between paths of robots */
+                    Find_Intersection(sRobotDataprevious, sRobotDatanext, sIntersectionDatanext);
+    
+                    
+                    if(sIntersectionDatanext.Intersection_flag == 1)
+                    {
+                        /* take actions to avoid intersections */
+                        IntersectionCollisionCheck(sRobotDataprevious, sRobotDatanext, sIntersectionDatanext);
+                    }
+                    
+                    
+                }
                 
-                /* take actions to avoid intersections */
-//                IntersectionCollisionCheck(sRobotDataprevious, sRobotDatanext, sIntersectionDatanext);
+                if(sRobotDataprevious.Waypoint_Added == true and !sRobotDataprevious.WaypointStack.empty())
+                {
+//                    if(FirstCheck != 0 and sRobotDataprevious.WaypointStack.top()!= sRobotDataprevious.TargetWaypoint)
+//                    {
+//                        sRobotDataprevious.StartWaypoint = sRobotDataprevious.TargetWaypoint;
+//                    }
+                    sRobotDataprevious.TargetWaypoint =  sRobotDataprevious.WaypointStack.top();
+                    sRobotDataprevious.WaypointStack.pop();
+                    sRobotDataprevious.Waypoint_Added = false;
+                }
+
 
 
             }
             sRobotDataprevious.Checked = 1;
-            if(!sRobotDataprevious.WaypointStack.empty())
-            {
-                sRobotDataprevious.TargetWaypoint =  sRobotDataprevious.WaypointStack.top();;
-                sRobotDataprevious.WaypointStack.pop();
-            }
-            
-//            if(!ptr2.WaypointStack.empty())
+
+//            if(!sRobotDataprevious.WaypointStack.empty())
 //            {
-//                ptr2.TargetWaypoint = ptr2.WaypointStack.top();
-//                ptr2.WaypointStack.pop();
+//                sRobotDataprevious.TargetWaypoint =  sRobotDataprevious.WaypointStack.top();
+//                sRobotDataprevious.WaypointStack.pop();
 //            }
+            
+
         }
         /* reset the firstcheck flag */
         FirstCheck = 0;
         
+        
         /* reset the RobotReachedWayPoint flag */
         RobotReachedWayPoint = 0;
+        
+        /* reset the RobotReachedWayPoint flag */
+        NewWayPointAdded = 0;
+        
+        CollinearFlag = 0;
     }
     
 }
@@ -291,70 +358,80 @@ UInt16 CThesisLoopFunctions::GetTicksToWait(Real dist, Real speed)
 void CThesisLoopFunctions::IntersectionCollisionCheck(CFootBotThesis::RobotData& ptr1, CFootBotThesis::RobotData &ptr2,
                                                       CFootBotThesis::IntersectionData &ptr3){
 
-    UInt16 TicksToWait_Robot1, TicksToWait_Robot2, TicksToWaitforSafedistance, TimeToIntersection, TimeDiff, Robo1StopTime, Robo2StopTime;
+    UInt16 TicksToWait_Robot1, TicksToWait_Robot2, TicksToWaitforSafedistance, TimeToIntersection, TimeDiff;
     Real DistanceToIntersection_Robot1, DistanceToIntersection_Robot2, IntersectionDistance;
     Real AdjustedVelocity;
     bool Intersection_flag;
+    
 
-    if(ptr3.Intersection_flag == 1)
-    {
-       
-        /* Get the distance between start point and intersection point */
-        DistanceToIntersection_Robot1 = CalculateDistance(ptr1.StartWaypoint, ptr3.IntersectionPoint);
-        DistanceToIntersection_Robot2 = CalculateDistance(ptr2.StartWaypoint, ptr3.IntersectionPoint);
 
-        /* calculate the time required to reach the intersection point */
-        TicksToWait_Robot1 = GetTicksToWait(DistanceToIntersection_Robot1, ptr1.fLinearWheelSpeed) + ptr1.StopTurningTime;
+//    if(ptr3.Intersection_flag == 1)
+//    {
+    
+    /* Get the distance between start point and intersection point */
+    DistanceToIntersection_Robot1 = CalculateDistance(ptr1.StartWaypoint, ptr3.IntersectionPoint);
+    DistanceToIntersection_Robot2 = CalculateDistance(ptr2.StartWaypoint, ptr3.IntersectionPoint);
+    
+    /* calculate the time required to reach the intersection point */
+    TicksToWait_Robot1 = GetTicksToWait(DistanceToIntersection_Robot1, ptr1.fLinearWheelSpeed) + ptr1.StopTurningTime;
 
-        TicksToWait_Robot2 = GetTicksToWait(DistanceToIntersection_Robot2, ptr2.fLinearWheelSpeed)+ ptr2.StopTurningTime;
+    TicksToWait_Robot2 = GetTicksToWait(DistanceToIntersection_Robot2, ptr2.fLinearWheelSpeed)+ ptr2.StopTurningTime;
+    
+    ptr1.dist = ptr1.StopTurningTime;
+    ptr2.dist = ptr2.StopTurningTime;
+    
+    TimeDiff = abs(TicksToWait_Robot1 - TicksToWait_Robot2);
 
-        TimeDiff = abs(TicksToWait_Robot1 - TicksToWait_Robot2);
-
-        TicksToWaitforSafedistance = GetTicksToWait(Safedistance , MaxLinearSpeed);
+    TicksToWaitforSafedistance = GetTicksToWait(Safedistance , MaxLinearSpeed);
 
 
         //if the difference between the times is equal to safe distance time between two robots
-        if(TimeDiff <= TicksToWaitforSafedistance)
-        {
+    if(TimeDiff <= TicksToWaitforSafedistance)
+    {
 
-            /* there is a chance of collision */
-            /* slow down the velocity of robot 2 as its priority is lower */
+        /* there is a chance of collision */
+        /* slow down the velocity of robot 2 as its priority is lower */
 //            if(ptr1.Priority >= ptr2.Priority)
-            if(DistanceToIntersection_Robot1 < DistanceToIntersection_Robot2)
+        if(DistanceToIntersection_Robot1 < DistanceToIntersection_Robot2)
+        {
+            IntersectionDistance = DistanceToIntersection_Robot2;
+            TimeToIntersection = TicksToWait_Robot1 + TicksToWaitforSafedistance;
+            AdjustedVelocity = (IntersectionDistance/TimeToIntersection) * SimulatorTicksperSec;
+//            if(AdjustedVelocity < 5)
+//            {
+//                AdjustedVelocity = 5;
+//
+//            }
+            ptr2.fLinearWheelSpeed = AdjustedVelocity;
+
+        }
+        /* slow down the velocity of robot 1 as its priority is lower */
+        else if(DistanceToIntersection_Robot2 < DistanceToIntersection_Robot1)
+        {
+            IntersectionDistance = DistanceToIntersection_Robot1;
+            TimeToIntersection = TicksToWait_Robot2 + TicksToWaitforSafedistance;
+            AdjustedVelocity = (IntersectionDistance/TimeToIntersection) * SimulatorTicksperSec;
+            ptr1.fLinearWheelSpeed = AdjustedVelocity;
+        }
+        else{
+            if(ptr1.GoingToNest)
             {
                 IntersectionDistance = DistanceToIntersection_Robot2;
                 TimeToIntersection = TicksToWait_Robot1 + TicksToWaitforSafedistance;
-                AdjustedVelocity = IntersectionDistance/(TimeToIntersection);
+                AdjustedVelocity = (IntersectionDistance/ TimeToIntersection) * SimulatorTicksperSec;
                 ptr2.fLinearWheelSpeed = AdjustedVelocity;
-
-            }
-            /* slow down the velocity of robot 1 as its priority is lower */
-            else if(DistanceToIntersection_Robot2 < DistanceToIntersection_Robot1)
-            {
-                IntersectionDistance = DistanceToIntersection_Robot1;
-                TimeToIntersection = TicksToWait_Robot2 + TicksToWaitforSafedistance;
-                AdjustedVelocity = IntersectionDistance/(TimeToIntersection);
-                ptr1.fLinearWheelSpeed = AdjustedVelocity;
             }
             else{
-                if(ptr1.GoingToNest)
-                {
-                    IntersectionDistance = DistanceToIntersection_Robot2;
-                    TimeToIntersection = TicksToWait_Robot1 + TicksToWaitforSafedistance;
-                    AdjustedVelocity = IntersectionDistance/(TimeToIntersection);
-                    ptr2.fLinearWheelSpeed = AdjustedVelocity;
-                }
-                else{
-                    IntersectionDistance = DistanceToIntersection_Robot1;
-                    TimeToIntersection = TicksToWait_Robot2 + TicksToWaitforSafedistance;
-                    AdjustedVelocity = IntersectionDistance/(TimeToIntersection);
-                    ptr1.fLinearWheelSpeed = AdjustedVelocity;
-                }
+                IntersectionDistance = DistanceToIntersection_Robot1;
+                TimeToIntersection = TicksToWait_Robot2 + TicksToWaitforSafedistance;
+                AdjustedVelocity = (IntersectionDistance/TimeToIntersection) * SimulatorTicksperSec;
+                ptr1.fLinearWheelSpeed = AdjustedVelocity;
             }
+        }
 
         }
-      }
-    
+//      }
+
     /* Reset the flag */
     ptr3.Intersection_flag = 0;
   
@@ -432,7 +509,7 @@ void CThesisLoopFunctions::CheckTurningIntersection(CFootBotThesis::RobotData& p
         
         if(ptr1.Priority > ptr2.Priority)
         {
-            ptr1.StopTurningTime= ptr1.StopTurningTime + 0;
+            ptr1.StopTurningTime = ptr1.StopTurningTime + 0;
         }
         else{
             
@@ -475,13 +552,117 @@ void CThesisLoopFunctions::CheckRobotPlacement(CFootBotThesis::RobotData& ptr1, 
     
 }
 
+//void CThesisLoopFunctions::CalculateNewWayPoint(CFootBotThesis::RobotData& ptr1)
+//{
+//    Real x, y;
+//    CVector3 AddedWaypoint;
+//
+//    Real x = ptr1.TargetWaypoint.GetX() + 0.5;
+//    Real y = ptr1.TargetWaypoint.GetY();
+//    AddedWaypoint.Set(x, y, 0);
+//
+//    bool exists = std::find(std::begin(TargetPosition), std::end(TargetPosition), AddedWaypoint) != std::end(a);
+//
+//    if(exists)
+//    {
+//
+//    }
+//    else
+//    {
+//
+//    }
+//
+//}
+
+
+
+void CThesisLoopFunctions::AddNewWayPoint(CFootBotThesis::RobotData& ptr1, CFootBotThesis::RobotData &ptr2, UInt8 ptrIndex)
+{
+    CVector3 AddedWaypoint;
+    /* add waypoint for ptr1 */
+    if(ptrIndex == 1)
+    {
+        // add a waypoint
+        if(ptr1.TargetWaypoint.GetX() > ptr2.TargetWaypoint.GetX())
+        {
+            Real x = ptr2.TargetWaypoint.GetX() - 0.5;
+            Real y = ptr2.TargetWaypoint.GetY();
+            AddedWaypoint.Set(x, y, 0);
+        }
+        else{
+            
+            Real x = ptr2.TargetWaypoint.GetX() + 0.5;
+            Real y = ptr2.TargetWaypoint.GetY();
+            AddedWaypoint.Set(x, y, 0);
+        }
+        if(ptr1.WaypointCounter <= 5)
+        {
+            /* add a way point before the final goal */
+            ptr1.WaypointStack.push(AddedWaypoint);
+            
+//            if(!ptr1.WaypointStack.empty())
+//            {
+//                ptr1.TargetWaypoint =  ptr1.WaypointStack.top();
+//                ptr1.WaypointStack.pop();
+//            }
+            
+            ptr1.Waypoint_Added = true;
+            ptr1.WaypointCounter++;
+        }
+    }
+    /* add waypoint for ptr2 */
+    else{
+        // add a waypoint
+        if(ptr1.TargetWaypoint.GetX() > ptr2.TargetWaypoint.GetX())
+        {
+            Real x = ptr1.TargetWaypoint.GetX() - 0.5;
+            Real y = ptr1.TargetWaypoint.GetY();
+            AddedWaypoint.Set(x, y, 0);
+        }
+        else{
+            
+            Real x = ptr1.TargetWaypoint.GetX() + 0.5;
+            Real y = ptr1.TargetWaypoint.GetY();
+            AddedWaypoint.Set(x, y, 0);
+        }
+        if(ptr2.WaypointCounter <= 5)
+        {
+            /* add a way point before the final goal */
+            ptr2.WaypointStack.push(AddedWaypoint);
+//            if(!ptr2.WaypointStack.empty())
+//            {
+//                ptr2.TargetWaypoint =  ptr2.WaypointStack.top();
+//                ptr2.WaypointStack.pop();
+//            }
+            ptr2.Waypoint_Added = true;
+            ptr2.WaypointCounter++;
+        }
+    }
+    
+    
+}
+
 /*****************************************************************************************************************/
 /* Function to check if robot start and target points are collinear */
 /*****************************************************************************************************************/
-void CThesisLoopFunctions::CheckCollinearity(CFootBotThesis::RobotData& ptr1, CFootBotThesis::RobotData &ptr2)
+void CThesisLoopFunctions::CheckCollinearity(CFootBotThesis::RobotData& ptr1, CFootBotThesis::RobotData &ptr2,
+                                             CFootBotThesis::IntersectionData &ptr3)
 {
     
     CVector3 AddedWaypoint;
+    Real Angle, Distance;
+    
+    ptr1.CollinearFlag = 0;
+    ptr2.CollinearFlag = 0;
+    
+    if(ptr1.Waypoint_Added == 1)
+    {
+        ptr1.Waypoint_Added = 0;
+    }
+    else if(ptr2.Waypoint_Added ==1)
+    {
+        ptr2.Waypoint_Added = 0;
+    }
     
     /* check if robot 1 start, target and robot 2 target points are collinear */
     Real Area_R1R2Goal =  ptr1.StartWaypoint.GetX() * (ptr2.TargetWaypoint.GetY() - ptr1.TargetWaypoint.GetY()) +
@@ -489,6 +670,12 @@ void CThesisLoopFunctions::CheckCollinearity(CFootBotThesis::RobotData& ptr1, CF
                         ptr1.TargetWaypoint.GetX() * (ptr1.StartWaypoint.GetY() - ptr2.TargetWaypoint.GetY());
     
     
+    /* check if robot 2 start, target and robot 1 target points are collinear */
+    Real Area_R2R1Goal =  ptr1.TargetWaypoint.GetX() * (ptr2.StartWaypoint.GetY() - ptr2.TargetWaypoint.GetY()) +
+    ptr2.StartWaypoint.GetX() * (ptr2.TargetWaypoint.GetY() - ptr1.TargetWaypoint.GetY()) +
+    ptr2.TargetWaypoint.GetX() * (ptr1.TargetWaypoint.GetY() - ptr2.StartWaypoint.GetY());
+    
+
     if(0 <= abs(Area_R1R2Goal) and abs(Area_R1R2Goal) <= 0.1)
     {
         /* check if robot 2 target point is between robot 1 start and target point */
@@ -500,29 +687,28 @@ void CThesisLoopFunctions::CheckCollinearity(CFootBotThesis::RobotData& ptr1, CF
 
         if(((distance_Total - 0.01) <= distance_1 + distance_2) and ((distance_Total + 0.01) >= distance_1 + distance_2))
         {
-            if(ptr1.WaypointCounter < MaximumWaypoint)
-            {
-                /* ptr2.TargetWaypoint  is between start and target of robot 1 */
-                // add a waypoint
-                Real x = ptr2.TargetWaypoint.GetX() + 0.5;
-                Real y = ptr2.TargetWaypoint.GetY();
-                AddedWaypoint.Set(x, y, 0);
-                
-                /* add a way point before the final goal */
-                ptr1.WaypointStack.push(AddedWaypoint);
-                ptr1.Waypoint_Added = true;
-                ptr1.WaypointCounter++;
-            }
+            ptr1.CollinearFlag = 1;
+//            ptr2.CollinearFlag = 1;
+            ptr1.Robot_ID_Collinearwith = ptr2.id_robot;
+            AddNewWayPoint(ptr1, ptr2, 1);
+//            if(ptr1.WaypointCounter < MaximumWaypoint)
+//            {
+//                /* ptr2.TargetWaypoint  is between start and target of robot 1 */
+//                // add a waypoint
+//                Real x = ptr2.TargetWaypoint.GetX() + 0.5;
+//                Real y = ptr2.TargetWaypoint.GetY();
+//                AddedWaypoint.Set(x, y, 0);
+//
+//                /* add a way point before the final goal */
+//                ptr1.WaypointStack.push(AddedWaypoint);
+//                ptr1.Waypoint_Added = true;
+//                ptr1.WaypointCounter++;
+//            }
         }
+        
     }
 
-
-    /* check if robot 2 start, target and robot 1 target points are collinear */
-   Real Area_R2R1Goal =  ptr1.TargetWaypoint.GetX() * (ptr2.StartWaypoint.GetY() - ptr2.TargetWaypoint.GetY()) +
-                         ptr2.StartWaypoint.GetX() * (ptr2.TargetWaypoint.GetY() - ptr1.TargetWaypoint.GetY()) +
-                         ptr2.TargetWaypoint.GetX() * (ptr1.TargetWaypoint.GetY() - ptr2.StartWaypoint.GetY());
-
-    if(0 <= abs(Area_R2R1Goal) and abs(Area_R2R1Goal) <= 0.1)
+    else if(0 <= abs(Area_R2R1Goal) and abs(Area_R2R1Goal) <= 0.1)
     {
         /* check if robot 1 target point is between robot 2 start and target point */
         
@@ -533,20 +719,29 @@ void CThesisLoopFunctions::CheckCollinearity(CFootBotThesis::RobotData& ptr1, CF
 
         if(((ddistance_Total- 0.01) <= ddistance_1 + ddistance_2) and ((ddistance_Total + 0.01) >= ddistance_1 + ddistance_2))
         {
-            if(ptr2.WaypointCounter < MaximumWaypoint)
-            {
-                /* ptr1.TargetWaypoint  is between start and target of robot 2 */
-                /* add a waypoint */
-                Real x = ptr1.TargetWaypoint.GetX() - 0.5;
-                Real y = ptr1.TargetWaypoint.GetY();
-                AddedWaypoint.Set(x, y, 0);
-              
-                /* add a way point before the final goal */
-                ptr2.WaypointStack.push(AddedWaypoint);
-                ptr2.WaypointCounter++;
-                ptr2.Waypoint_Added = true;
-            }
+            ptr1.CollinearFlag = 1;
+//            ptr2.CollinearFlag = 1;
+            ptr2.Robot_ID_Collinearwith = ptr1.id_robot;
+            AddNewWayPoint(ptr1, ptr2, 2);
+//            if(ptr2.WaypointCounter < MaximumWaypoint)
+//            {
+//                /* ptr1.TargetWaypoint  is between start and target of robot 2 */
+//                /* add a waypoint */
+//                Real x = ptr1.TargetWaypoint.GetX() - 0.5;
+//                Real y = ptr1.TargetWaypoint.GetY();
+//                AddedWaypoint.Set(x, y, 0);
+//
+//                /* add a way point before the final goal */
+//                ptr2.WaypointStack.push(AddedWaypoint);
+//                ptr2.WaypointCounter++;
+//                ptr2.Waypoint_Added = true;
+//            }
         }
+    }
+    
+    else
+    {
+        CheckRobotHeadingCourse(ptr1, ptr2, ptr3);
     }
     
 }
@@ -567,56 +762,133 @@ void CThesisLoopFunctions::CheckRobotHeadingCourse(CFootBotThesis::RobotData& pt
     /* find the angle between lines */
     RobotCourseAngle = CalculateAngleBetweenRobotCourse(ptr1, ptr2);
     
-    /* find if lines intersect */
+    Real slopeline1 = (ptr1.TargetWaypoint.GetY()- ptr1.StartWaypoint.GetY())/(ptr1.TargetWaypoint.GetX()- ptr1.StartWaypoint.GetX());
+    Real slopeline2 = (ptr2.TargetWaypoint.GetY()- ptr2.StartWaypoint.GetY())/(ptr2.TargetWaypoint.GetX()- ptr2.StartWaypoint.GetX());
+    
+    Real y_intercept1 = ptr1.TargetWaypoint.GetY() + (slopeline1 * ptr1.TargetWaypoint.GetX());
+    Real y_intercept2 = ptr2.TargetWaypoint.GetY() + (slopeline1 * ptr2.TargetWaypoint.GetX());
+    
+    ptr1.dist = RobotCourseAngle;
+    ptr2. dist = RobotCourseAngle;
+    
     Find_Intersection(ptr1, ptr2, ptr3);
     
-    if(ptr3.Intersection_flag == 1 and 0<= RobotCourseAngle and RobotCourseAngle <= OverlappingCourseAngle)
+    if(0<= RobotCourseAngle and RobotCourseAngle <= OverlappingCourseAngle)
     {
-        /* Robot path is too close */
-                if(distanceR2 > distanceR1)
+        if(abs(y_intercept2 - y_intercept1) >=Safedistance and ptr3.Intersection_flag!=1)
+        {
+          /* Lines are parallel and sufficiently away */
+        }
+        else
+        {
+            ptr1.CollinearFlag = 1;
+//            ptr2.CollinearFlag = 1;
+            if(ptr1.GoingToNest)
+            {
+                
+                AddNewWayPoint(ptr1, ptr2, 2);
+            }
+            else if(ptr2.GoingToNest)
+            {
+                
+                AddNewWayPoint(ptr1, ptr2, 1);
+            }
+            else
+            {
+                Real distance1 = CalculateDistance(ptr1.StartWaypoint, ptr1.TargetWaypoint);
+                Real distance2 = CalculateDistance(ptr2.StartWaypoint, ptr2.TargetWaypoint);
+                
+                // add waypoint for 2nd robot
+                if(distance1 < distance2)
                 {
-                    // add waypoint for robot 2
-                    // add waypoint to left or right depends on the value of x - coordinate of the robot
-                    if(ptr1.StartWaypoint.GetX() > ptr2.StartWaypoint.GetX())
-                    {
-                        Real x = ptr2.StartWaypoint.GetX() - 0.5;
-                        Real y = ptr2.StartWaypoint.GetY();
-                        WaypointAdd.Set(x,y,0);
-                    }
-                    else{
-                        Real x = ptr2.StartWaypoint.GetX() + 0.5;
-                        Real y = ptr2.StartWaypoint.GetY();
-                        WaypointAdd.Set(x,y,0);
-                    }
-                    if(ptr2.WaypointCounter < MaximumWaypoint)
-                    {
-                        ptr2.WaypointStack.push(WaypointAdd);
-                        ptr2.WaypointCounter++;
-                    }
+                    
+                    AddNewWayPoint(ptr1, ptr2, 2);
+                    
                 }
-                else{
-                    // add waypoint for robot 1
-                    // add waypoint to left or right depends on the value of x - coordinate of the robot
-                    if(ptr1.StartWaypoint.GetX() > ptr2.StartWaypoint.GetX())
-                    {
-                        Real x = ptr1.StartWaypoint.GetX() - 0.5;
-                        Real y = ptr1.StartWaypoint.GetY();
-                        WaypointAdd.Set(x,y,0);
-                    }
-                    else{
-                        Real x = ptr1.StartWaypoint.GetX() + 0.5;
-                        Real y = ptr1.StartWaypoint.GetY();
-                        WaypointAdd.Set(x,y,0);
-                    }
-        
-                    if(ptr1.WaypointCounter < MaximumWaypoint)
-                    {
-                        ptr1.WaypointStack.push(WaypointAdd);
-                        ptr1.WaypointCounter++;
-                    }
+                // add waypoint for 1st robot
+                else
+                {
+                    AddNewWayPoint(ptr1, ptr2, 1);
+                    
                 }
-        
+            }
+            
+        }
+        ptr3.Intersection_flag = 0;
     }
+    
+    /* find if lines intersect */
+//    Find_Intersection(ptr1, ptr2, ptr3);
+//    if(ptr1.id_robot == 0)
+//    {
+//        ptr1.dist = RobotCourseAngle;
+//    }
+//    if(0<= RobotCourseAngle and RobotCourseAngle <= OverlappingCourseAngle)
+//    {
+//
+////        DistanceBetweenCourse(ptr1, ptr2);
+//    }
+    
+    /* find if lines intersect */
+//    Find_Intersection(ptr1, ptr2, ptr3);
+    
+//    if(ptr3.Intersection_flag == 1 and 0<= RobotCourseAngle and RobotCourseAngle <= OverlappingCourseAngle)
+//    {
+//        ptr1.CollinearFlag = 1;
+//        ptr3.Intersection_flag = 0;
+//        if(distanceR1 < distanceR2)
+//        {
+//            ptr2.CollinearFlag = 1;
+//        }
+//        else{
+//            ptr1.CollinearFlag = 1;
+//        }
+    
+        /* Robot path is too close */
+//        if(distanceR2 > distanceR1)
+//        {
+//            // add waypoint for robot 2
+//            // add waypoint to left or right depends on the value of x - coordinate of the robot
+//            if(ptr1.StartWaypoint.GetX() > ptr2.StartWaypoint.GetX())
+//            {
+//                Real x = ptr2.StartWaypoint.GetX() - 0.5;
+//                Real y = ptr2.StartWaypoint.GetY();
+//                WaypointAdd.Set(x,y,0);
+//            }
+//            else{
+//                Real x = ptr2.StartWaypoint.GetX() + 0.5;
+//                Real y = ptr2.StartWaypoint.GetY();
+//                WaypointAdd.Set(x,y,0);
+//            }
+//            if(ptr2.WaypointCounter < MaximumWaypoint)
+//            {
+//                ptr2.WaypointStack.push(WaypointAdd);
+//                ptr2.WaypointCounter++;
+//            }
+//        }
+//        else{
+//            // add waypoint for robot 1
+//            // add waypoint to left or right depends on the value of x - coordinate of the robot
+//            if(ptr1.StartWaypoint.GetX() > ptr2.StartWaypoint.GetX())
+//            {
+//                Real x = ptr1.StartWaypoint.GetX() - 0.5;
+//                Real y = ptr1.StartWaypoint.GetY();
+//                WaypointAdd.Set(x,y,0);
+//            }
+//            else{
+//                Real x = ptr1.StartWaypoint.GetX() + 0.5;
+//                Real y = ptr1.StartWaypoint.GetY();
+//                WaypointAdd.Set(x,y,0);
+//            }
+//
+//            if(ptr1.WaypointCounter < MaximumWaypoint)
+//            {
+//                ptr1.WaypointStack.push(WaypointAdd);
+//                ptr1.WaypointCounter++;
+//            }
+//        }
+
+//    }
     
 }
 
@@ -630,7 +902,7 @@ void CThesisLoopFunctions::DistanceBetweenCourse(CFootBotThesis::RobotData& ptr1
     
     CVector3 WaypointAdd;
     /* find if target point is too close to the course of the robot */
-    
+   
     /* linear equation parameters for Robot 1 */
     Real A1 = (ptr1.StartWaypoint.GetY() - ptr1.TargetWaypoint.GetY());
     Real B1 = (ptr1.TargetWaypoint.GetX() - ptr1.StartWaypoint.GetX());
@@ -642,57 +914,135 @@ void CThesisLoopFunctions::DistanceBetweenCourse(CFootBotThesis::RobotData& ptr1
     Real C2 = ((ptr2.StartWaypoint.GetX() * ptr2.TargetWaypoint.GetY()) - (ptr2.TargetWaypoint.GetX() * ptr2.StartWaypoint.GetY()));
           
           
-    /* check if target point of Robot 1 is close to robot 2 course */
+    /* check if current point of Robot 1 is close to robot 2 course */
           
-    Real distR1 = abs(A2*ptr1.TargetWaypoint.GetX() + B2*ptr1.TargetWaypoint.GetY() + C2)/(sqrt(A2*A2 + B2*B2));
+    Real distR1 = abs(A2*ptr1.CurrentPos.GetX() + B2*ptr1.CurrentPos.GetY() + C2)/(sqrt(A2*A2 + B2*B2));
           
-    Real distR2 = abs(A1*ptr2.TargetWaypoint.GetX() + B1*ptr2.TargetWaypoint.GetY() + C1)/(sqrt(A1*A1 + B1*B1));
-      
+//    Real distR2 = abs(A1*ptr2.CurrentPos.GetX() + B1*ptr2.CurrentPos.GetY() + C1)/(sqrt(A1*A1 + B1*B1));
+    
     /* target point of robot 1 is close to Robot 2 course*/
     if(distR1 < Safedistance)
     {
-        /* add waypoint for Robot 2 */
-        if(ptr1.TargetWaypoint.GetX() > ptr2.TargetWaypoint.GetX())
+        WaitCounter = 50;
+        // add waypoint for 2nd robot
+        if(ptr1.GoingToNest)
         {
-            Real x = ptr1.TargetWaypoint.GetX() - 0.5;
-            Real y = ptr1.TargetWaypoint.GetY();
-            WaypointAdd.Set(x,y,0);
+            ptr2.CollinearFlag = 1;
+//            if(ptr1.CurrentPos.GetX() > ptr2.CurrentPos.GetX())
+//            {
+//                Real x = ptr1.CurrentPos.GetX() - 0.5;
+//                Real y = ptr1.CurrentPos.GetY();
+//                WaypointAdd.Set(x,y,0);
+//            }
+//            else{
+//                Real x = ptr1.CurrentPos.GetX() + 0.5;
+//                Real y = ptr1.CurrentPos.GetY();
+//                WaypointAdd.Set(x,y,0);
+//            }
+//
+//            if(ptr2.WaypointCounter < MaximumWaypoint)
+//            {
+//                ptr2.WaypointStack.push(WaypointAdd);
+//            }
+            
+        }
+        // add waypoint for 1st robot
+        else if(ptr2.GoingToNest)
+        {
+            ptr1.CollinearFlag = 1;
+//            if(ptr1.CurrentPos.GetX() > ptr2.CurrentPos.GetX())
+//            {
+//                Real x = ptr2.CurrentPos.GetX() - 0.5;
+//                Real y = ptr2.CurrentPos.GetY();
+//                WaypointAdd.Set(x,y,0);
+//            }
+//            else{
+//                Real x = ptr2.CurrentPos.GetX() + 0.5;
+//                Real y = ptr2.CurrentPos.GetY();
+//                WaypointAdd.Set(x,y,0);
+//            }
+//
+//            if(ptr1.WaypointCounter < MaximumWaypoint)
+//            {
+//                ptr1.WaypointStack.push(WaypointAdd);
+//            }
+            
         }
         else{
-            Real x = ptr1.TargetWaypoint.GetX() + 0.5;
-            Real y = ptr1.TargetWaypoint.GetY();
-            WaypointAdd.Set(x,y,0);
+            Real distance1 = CalculateDistance(ptr1.StartWaypoint, ptr1.TargetWaypoint);
+            Real distance2 = CalculateDistance(ptr2.StartWaypoint, ptr2.TargetWaypoint);
+            
+            // add waypoint for 2nd robot
+            if(distance1 < distance2)
+            {
+                ptr2.CollinearFlag = 1;
+//                if(ptr1.CurrentPos.GetX() > ptr2.CurrentPos.GetX())
+//                {
+//                    Real x = ptr1.CurrentPos.GetX() - 0.5;
+//                    Real y = ptr1.CurrentPos.GetY();
+//                    WaypointAdd.Set(x,y,0);
+//                }
+//                else{
+//                    Real x = ptr1.CurrentPos.GetX() + 0.5;
+//                    Real y = ptr1.CurrentPos.GetY();
+//                    WaypointAdd.Set(x,y,0);
+//                }
+//
+//                if(ptr2.WaypointCounter < MaximumWaypoint)
+//                {
+//                    ptr2.WaypointStack.push(WaypointAdd);
+//                }
+                
+            }
+            // add waypoint for 1st robot
+            else{
+                ptr1.CollinearFlag = 1;
+//                if(ptr1.CurrentPos.GetX() > ptr2.CurrentPos.GetX())
+//                {
+//                    Real x = ptr2.CurrentPos.GetX() - 0.5;
+//                    Real y = ptr2.CurrentPos.GetY();
+//                    WaypointAdd.Set(x,y,0);
+//                }
+//                else{
+//                    Real x = ptr2.CurrentPos.GetX() + 0.5;
+//                    Real y = ptr2.CurrentPos.GetY();
+//                    WaypointAdd.Set(x,y,0);
+//                }
+//
+//                if(ptr1.WaypointCounter < MaximumWaypoint)
+//                {
+//                    ptr1.WaypointStack.push(WaypointAdd);
+//                }
+                
+            }
         }
-        
-        if(ptr2.WaypointCounter < MaximumWaypoint)
-        {
-            ptr2.WaypointStack.push(WaypointAdd);
-        }
+        /* add waypoint for Robot 2 */
+       
             
     }
-    /* target point of robot2 is close to Robot 1 course*/
-    else{
-        
-        /* add waypoint for Robot 1 */
-        if(ptr2.TargetWaypoint.GetX() > ptr1.TargetWaypoint.GetX())
-        {
-            Real x = ptr2.TargetWaypoint.GetX() - 0.5;
-            Real y = ptr2.TargetWaypoint.GetY();
-            WaypointAdd.Set(x,y,0);
-        }
-        else{
-            Real x = ptr2.TargetWaypoint.GetX() + 0.5;
-            Real y = ptr2.TargetWaypoint.GetY();
-            WaypointAdd.Set(x,y,0);
-        }
-        
-        if(ptr1.WaypointCounter < MaximumWaypoint)
-        {
-            ptr1.WaypointStack.push(WaypointAdd);
-            ptr1.WaypointCounter++;
-        }
-    }
-          
+//    /* target point of robot2 is close to Robot 1 course*/
+//    else{
+//
+//        /* add waypoint for Robot 1 */
+//        if(ptr2.TargetWaypoint.GetX() > ptr1.TargetWaypoint.GetX())
+//        {
+//            Real x = ptr2.TargetWaypoint.GetX() - 0.5;
+//            Real y = ptr2.TargetWaypoint.GetY();
+//            WaypointAdd.Set(x,y,0);
+//        }
+//        else{
+//            Real x = ptr2.TargetWaypoint.GetX() + 0.5;
+//            Real y = ptr2.TargetWaypoint.GetY();
+//            WaypointAdd.Set(x,y,0);
+//        }
+//
+//        if(ptr1.WaypointCounter < MaximumWaypoint)
+//        {
+//            ptr1.WaypointStack.push(WaypointAdd);
+//            ptr1.WaypointCounter++;
+//        }
+//    }
+    
 }
 
 /*****************************************************************************************************************/
@@ -705,9 +1055,8 @@ Real CThesisLoopFunctions::CalculateAngleBetweenRobotCourse(CFootBotThesis::Robo
     
     CDegrees headingToTargetR2 = ToDegrees((ptr2.TargetWaypoint - ptr2.StartWaypoint).GetZAngle());
     
-    
     /* get the current heading angle of the robot */
-    Real AngleRobotCourse = abs(180 - (abs(headingToTargetR1.GetValue()) - abs(headingToTargetR2.GetValue())));
+    Real AngleRobotCourse = abs(180 - (abs(headingToTargetR1.GetValue()) + abs(headingToTargetR2.GetValue())));
     
     return AngleRobotCourse;
 

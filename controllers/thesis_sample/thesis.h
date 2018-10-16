@@ -101,6 +101,7 @@ public:
         CVector3 StartPosition;
         CVector3 TargetWaypoint;
         CVector3 StartWaypoint;
+        CVector3 CurrentPos;
         UInt16 id_robot;
         UInt16 Priority;
         UInt16 WaypointCounter;
@@ -115,6 +116,8 @@ public:
         bool Checked;
         bool Waypoint_Added;
         bool WaypointReached;
+        bool CollinearFlag;
+        UInt16 Robot_ID_Collinearwith;
         std::stack<CVector3>WaypointStack;
     };
     
@@ -252,7 +255,7 @@ private:
    const Real SearchStepSize                   = 0.16;
    const Real PI                               = 3.141592653589793238463;
    UInt16 TicksToWaitforSafedistance;
-   UInt16 collision_counter;
+//   UInt16 collision_counter;
    CRange<Real> GoStraightAngleRangeInDegrees;
    ticpp::Document m_tConfiguration;
    TConfigurationNode m_tConfRoot;
