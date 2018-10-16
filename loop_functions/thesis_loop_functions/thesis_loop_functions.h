@@ -67,6 +67,7 @@ private:
     const Real FOOTBOT_INTERWHEEL_DISTANCE      = 0.14f;
     const Real Safedistance = 0.5;
     const Real MaxLinearSpeed = 10.0f;
+    const Real MinLinearSpeed = 5.0f;
     const Real Robot_Gap_Distance = 0.5f;
     const UInt16 MaximumWaypoint = 5;
     const Real OverlappingCourseAngle = 25.0f;
@@ -74,7 +75,8 @@ private:
     CVector3 TargetPosition[50];
     UInt16 WaitCounter;
     bool CollinearFlag;
-    
+    const Real Arena_Minimum = -2;
+    const Real Arena_Maximum = 2;
 
 
 

@@ -100,6 +100,7 @@ void CFootBotThesis::Init(TConfigurationNode& t_node) {
     
 //    CurrentWayPoint = stRobotData.WaypointStack.top();
     stRobotData.TargetWaypoint = stRobotData.TargetPosition;
+ 
 //    stRobotData.WaypointStack.pop();
     stRobotData.WaypointCounter = 0;
     stRobotData.Checked = 0;
@@ -126,7 +127,7 @@ std::string CFootBotThesis::extractID(std::string str)
 /* Control Step */
 /****************************************/
 void CFootBotThesis::ControlStep() {
-    
+
     if(stRobotData.id_robot == 0 or stRobotData.id_robot == 1)
     {
         LOG<<"RobotID: "<<stRobotData.id_robot<<std::endl;
@@ -141,7 +142,7 @@ void CFootBotThesis::ControlStep() {
     //        LOG<<"Collision length: "<<collisionAngle<<std::endl;
 //        LOG<<"Stop Time: "<<stRobotData.StopTurningTime<<std::endl;
     //        LOG<<"Waypoint Stack Size: "<<stRobotData.WaypointStack.size()<<std::endl;
-        LOG<<"Angle course: "<<stRobotData.dist<<std::endl;
+        LOG<<"Collinearity: "<<stRobotData.dist<<std::endl;
     //
     //        LOG<<"Intersection robot: "<<st_IntersectionData.Robot_ID_Intersectingwith<<std::endl;
         LOG<<"Intersection point: "<<st_IntersectionData.IntersectionPoint<<std::endl;
@@ -542,11 +543,9 @@ void CFootBotThesis::PopMovement() {
 /********************************************************************/
 bool CFootBotThesis::CollisionDetection() {
 
-//    Real output;
-//    Real min = 10;
-//    Real max = 30;
+
     CVector3 PositionCurr, NewTargetWayPoint;
-    Real x, y;
+    Real x, y, diff;
     CRadians angle, angle_error, AngleTol;
     AngleTol = TargetAngleTolerance;
 //    argos::CVector2 collisionVector = GetCollisionVector();
@@ -569,7 +568,6 @@ bool CFootBotThesis::CollisionDetection() {
         
         // if collinear
         if(stRobotData.CollinearFlag == 1)
-//        if(collision_counter <= 200)
         {
         
             PushMovement(BACK, 0.1);
@@ -580,17 +578,47 @@ bool CFootBotThesis::CollisionDetection() {
             {
                 x = PositionCurr.GetX() - 0.5;
                 y = PositionCurr.GetY() ;
+                
+                if(x < (Arena_Min + 0.4))
+                {
+                    diff = abs((Arena_Min + 0.4) - PositionCurr.GetX());
+                    x = PositionCurr.GetX() - diff;
+                }
+                else if(x > (Arena_Max - 0.4))
+                {
+                    
+                    diff = abs(PositionCurr.GetX() - (Arena_Max - 0.4));
+                    x = PositionCurr.GetX() + diff;
+                }
+              
             }
             else
             {
                 x = PositionCurr.GetX() + 0.5;
                 y = PositionCurr.GetY();
+                
+                if(x < (Arena_Min + 0.4))
+                {
+                    diff = abs((Arena_Min + 0.4) - PositionCurr.GetX());
+                    x = PositionCurr.GetX() - diff;
+                }
+                else if(x > (Arena_Max - 0.4))
+                {
+                    
+                    diff = abs(PositionCurr.GetX() - (Arena_Max - 0.4));
+                    x = PositionCurr.GetX() + diff;
+                }
+                
             }
+            
             
             if(stRobotData.WaypointStack.empty())
             {
                stRobotData.WaypointStack.push(stRobotData.TargetWaypoint);
                NewTargetWayPoint.Set(x, y, 0);
+                x =0;
+                y=0;
+                diff =0;
             }
             stRobotData.TargetWaypoint = NewTargetWayPoint;
             
@@ -616,63 +644,9 @@ bool CFootBotThesis::CollisionDetection() {
             {
                 SetRightTurn((37.5 + collisionAngle));
             }
-//            }
             
         }
 
-//        Real distanceToTarget = (NewTargetWayPoint - GetPosition()).Length();
-//        angle = (NewTargetWayPoint - GetPosition()).GetZAngle();
-//        stRobotData.InitialOrientation = angle;
-//
-//        /* get the current heading angle of the robot */
-//        angle_error = (GetHeadingAngle() - angle).SignedNormalize();
-//
-//        /* turn left */
-//        if(angle_error > AngleTol)
-//        {
-//            PushMovement(LEFT, -ToDegrees(angle_error).GetValue());
-//        }
-//        /* turn right */
-//        else if(angle_error < -AngleTol)
-//        {
-//            PushMovement(RIGHT, ToDegrees(angle_error).GetValue());
-//        }
-//        /* Move Forward */
-//        else
-//        {
-//            PushMovement(FORWARD, distanceToTarget);
-//        }
-//
-//        stRobotData.CollinearFlag = 0;
-//
-//
-//        }
-////        // if not collinear
-//        else
-//        {
-//
-//            if(!stRobotData.WaypointStack.empty())
-//            {
-//                stRobotData.TargetWaypoint = stRobotData.WaypointStack.top();
-//                stRobotData.WaypointStack.pop();
-////                stRobotData.WaypointStack.push(stRobotData.TargetWaypoint);
-////                NewTargetWayPoint.Set(x, y, 0);
-//            }
-////            stRobotData.TargetWaypoint = NewTargetWayPoint;
-//
-//            PushMovement(FORWARD, SearchStepSize);
-//            if(collisionAngle <= 0.0)
-//            {
-//                SetLeftTurn((37.5 - collisionAngle) + ToDegrees(GetHeadingAngle()).GetValue());
-//            }
-//            else
-//            {
-//                SetRightTurn((37.5 + collisionAngle) + ToDegrees(GetHeadingAngle()).GetValue());
-//            }
-//            collision_counter = 0;
-//        }
-//
-       
     }
     
     return isCollisionDetected;

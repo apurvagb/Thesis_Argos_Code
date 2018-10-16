@@ -248,12 +248,12 @@ private:
    const Real Kp                               = 5;
    const Real FOOTBOT_RADIUS                   = 0.085036758f;
    const Real FOOTBOT_INTERWHEEL_DISTANCE      = 0.14f;
-//   const Real fBaseAngularWheelSpeed           = 8.0f;
-//   const Real fLinearWheelSpeed                = 10.0f;
    const Real TargetDistanceTolerance          = 0.01;
    const CRadians TargetAngleTolerance         = CRadians(0.04);
    const Real SearchStepSize                   = 0.16;
    const Real PI                               = 3.141592653589793238463;
+   const Real Arena_Min = -2;
+   const Real Arena_Max = 2;
    UInt16 TicksToWaitforSafedistance;
 //   UInt16 collision_counter;
    CRange<Real> GoStraightAngleRangeInDegrees;
