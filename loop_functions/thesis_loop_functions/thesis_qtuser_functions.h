@@ -21,6 +21,7 @@ public:
 private:
 
    void DrawWaypoints(const std::vector<CVector3>& c_waypoints);
+   void Draw(CFootBotEntity& c_entity);
 
 private:
 

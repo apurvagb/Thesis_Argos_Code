@@ -14,6 +14,7 @@ set(CMAKE_CXX_COMPILER_ID "Clang")
 set(CMAKE_TARGET_DEFINITIONS_CXX
   "QT_CORE_LIB"
   "QT_GUI_LIB"
+  "QT_NO_DEBUG"
   "QT_WIDGETS_LIB"
   )
 
@@ -22,6 +23,10 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "loop_functions/thesis_loop_functions"
   "../loop_functions/thesis_loop_functions"
   "loop_functions/thesis_loop_functions/thesis_loop_functions_autogen/include"
+  "/usr/local/include"
+  "../"
+  "/usr/local/Cellar/argos3/3.0.0-beta52/include"
+  "/usr/local/include/lua"
   "/System/Library/Frameworks/OpenGL.framework/Headers"
   "/usr/local/Cellar/qt/5.11.1/lib/QtWidgets.framework"
   "/usr/local/Cellar/qt/5.11.1/lib/QtWidgets.framework/Headers"
@@ -30,10 +35,6 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "/usr/local/Cellar/qt/5.11.1/lib/QtCore.framework"
   "/usr/local/Cellar/qt/5.11.1/lib/QtCore.framework/Headers"
   "/usr/local/Cellar/qt/5.11.1/./mkspecs/macx-clang"
-  "/usr/local/include"
-  "../"
-  "/usr/local/Cellar/argos3/3.0.0-beta52/include"
-  "/usr/local/include/lua"
   )
 
 # Targets to which this target links.

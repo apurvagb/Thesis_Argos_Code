@@ -104,6 +104,7 @@ void CFootBotThesis::Init(TConfigurationNode& t_node) {
 //    stRobotData.WaypointStack.pop();
     stRobotData.WaypointCounter = 0;
     stRobotData.Checked = 0;
+    stRobotData.StopTurningTime = 0;
     collision_counter = 0;
 }
 
@@ -128,37 +129,36 @@ std::string CFootBotThesis::extractID(std::string str)
 /****************************************/
 void CFootBotThesis::ControlStep() {
 
-    if(stRobotData.id_robot == 0 or stRobotData.id_robot == 1)
-    {
-        LOG<<"RobotID: "<<stRobotData.id_robot<<std::endl;
-        LOG<<"Collision Counter: "<<collision_counter<<std::endl;
-        
-        LOG<<"Waypoint Start: "<<stRobotData.StartWaypoint<<std::endl;
-        LOG<<"Waypoint End: "<<stRobotData.TargetWaypoint<<std::endl;
-    //        LOG<<"Waypoint added flag: "<<stRobotData.WaypointReached<<std::endl;
-    //        LOG<<"Checked flag: "<<stRobotData.Checked<<std::endl;
-        LOG<<"Heading Angle: "<<stRobotData.InitialOrientation<<std::endl;
-    //        LOG<<"Collision length: "<<collisionVector.Length()<<std::endl;
-    //        LOG<<"Collision length: "<<collisionAngle<<std::endl;
-//        LOG<<"Stop Time: "<<stRobotData.StopTurningTime<<std::endl;
-    //        LOG<<"Waypoint Stack Size: "<<stRobotData.WaypointStack.size()<<std::endl;
-        LOG<<"Collinearity: "<<stRobotData.dist<<std::endl;
-    //
-    //        LOG<<"Intersection robot: "<<st_IntersectionData.Robot_ID_Intersectingwith<<std::endl;
-        LOG<<"Intersection point: "<<st_IntersectionData.IntersectionPoint<<std::endl;
-        LOG<<"Current Movement State: "<<CurrentMovementState<<std::endl;
-        LOG<<"Collinear flag "<<stRobotData.CollinearFlag<<std::endl;
-    //        LOG<<"Initial Turning Wait time: "<<stRobotData.Intial_TurningWaitTime<<std::endl;
-        LOG<<"Veocity: "<<stRobotData.fLinearWheelSpeed<<std::endl;
-        LOG<<"----------------------------------------------------"<<std::endl;
+   
+    LOG<<"RobotID: "<<stRobotData.id_robot<<std::endl;
+    LOG<<"Collision Counter: "<<collision_counter<<std::endl;
+    
+    LOG<<"Waypoint Start: "<<stRobotData.StartWaypoint<<std::endl;
+    LOG<<"Waypoint End: "<<stRobotData.TargetWaypoint<<std::endl;
+//        LOG<<"Waypoint added flag: "<<stRobotData.WaypointReached<<std::endl;
+//        LOG<<"Checked flag: "<<stRobotData.Checked<<std::endl;
+    LOG<<"Heading Angle: "<<stRobotData.InitialOrientation<<std::endl;
+//        LOG<<"Collision length: "<<collisionVector.Length()<<std::endl;
+        LOG<<"Collision Angle: "<<collisionAngle<<std::endl;
+        LOG<<"Stop Time: "<<stRobotData.StopTurningTime<<std::endl;
+//        LOG<<"Waypoint Stack Size: "<<stRobotData.WaypointStack.size()<<std::endl;
+    LOG<<"Collinearity: "<<stRobotData.dist<<std::endl;
+//
+//        LOG<<"Intersection robot: "<<st_IntersectionData.Robot_ID_Intersectingwith<<std::endl;
+    LOG<<"Intersection point: "<<st_IntersectionData.IntersectionPoint<<std::endl;
+    LOG<<"Current Movement State: "<<CurrentMovementState<<std::endl;
+    LOG<<"Collinear flag "<<stRobotData.CollinearFlag<<std::endl;
+//        LOG<<"Initial Turning Wait time: "<<stRobotData.Intial_TurningWaitTime<<std::endl;
+    LOG<<"Veocity: "<<stRobotData.fLinearWheelSpeed<<std::endl;
+    LOG<<"----------------------------------------------------"<<std::endl;
 
-    //        LOG<<"Stack: "<<stRobotData.WaypointStack.top()<<std::endl;
-    //        LOG<<"Initial Turning Time: "<<stRobotData.Intial_TurningWaitTime<<std::endl;
-    //        LOG<<"Priority: "<<stRobotData.Priority<<std::endl;
-    //        LOG<<"Stop Turning Time: "<<stRobotData.StopTurningTime<<std::endl;
-    //        LOG<<"Distance between robot: "<<stRobotData.dist<<std::endl;
-    //        LOG<<"velocity: "<<stRobotData.fLinearWheelSpeed<<std::endl;
-    }
+//        LOG<<"Stack: "<<stRobotData.WaypointStack.top()<<std::endl;
+//        LOG<<"Initial Turning Time: "<<stRobotData.Intial_TurningWaitTime<<std::endl;
+//        LOG<<"Priority: "<<stRobotData.Priority<<std::endl;
+//        LOG<<"Stop Turning Time: "<<stRobotData.StopTurningTime<<std::endl;
+//        LOG<<"Distance between robot: "<<stRobotData.dist<<std::endl;
+//        LOG<<"velocity: "<<stRobotData.fLinearWheelSpeed<<std::endl;
+    
     stRobotData.CurrentPos = GetPosition();
     if(stRobotData.Checked == 1)
     {
@@ -627,14 +627,7 @@ bool CFootBotThesis::CollisionDetection() {
         }
         else{
             
-//            if(!stRobotData.WaypointStack.empty())
-//            {
-//                stRobotData.TargetWaypoint = stRobotData.WaypointStack.top();
-//                stRobotData.WaypointStack.pop();
-//                collision_counter = 0;
-//
-//            }
-//            else{
+
             PushMovement(FORWARD, SearchStepSize);
             if(collisionAngle <= 0.0)
             {

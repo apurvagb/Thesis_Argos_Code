@@ -53,8 +53,8 @@ class CFootBotThesis : public CCI_Controller {
 
 public:
     
-    Real Rover_Goal_X[5] = {1, -1.5, 0, 0, -1};
-    Real Rover_Goal_Y[5] = {1, -1, 0, 0, 1};
+    Real Rover_Goal_X[6] = {1, -1.5, 0, 1, -1, 0};
+    Real Rover_Goal_Y[6] = {1, -1, 0, 0, 1, 0.5};
     
     
    /* Class constructor. */

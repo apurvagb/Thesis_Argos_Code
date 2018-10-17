@@ -325,8 +325,6 @@ void CThesisLoopFunctions::IntersectionCollisionCheck(CFootBotThesis::RobotData&
 
     TicksToWait_Robot2 = GetTicksToWait(DistanceToIntersection_Robot2, ptr2.fLinearWheelSpeed)+ ptr2.StopTurningTime;
     
-//    ptr1.dist = ptr1.StopTurningTime;
-//    ptr2.dist = ptr2.StopTurningTime;
     
     TimeDiff = abs(TicksToWait_Robot1 - TicksToWait_Robot2);
 
@@ -348,6 +346,7 @@ void CThesisLoopFunctions::IntersectionCollisionCheck(CFootBotThesis::RobotData&
             
             if(AdjustedVelocity < MinLinearSpeed)
             {
+                AdjustedVelocity = MinLinearSpeed;
                 Real Time = GetTicksToWait(IntersectionDistance , MinLinearSpeed);
                 Real stop_time = abs(Time - TimeToIntersection);
                 ptr2.StopTurningTime = stop_time;
@@ -363,6 +362,7 @@ void CThesisLoopFunctions::IntersectionCollisionCheck(CFootBotThesis::RobotData&
             AdjustedVelocity = (IntersectionDistance/TimeToIntersection) * SimulatorTicksperSec;
             if(AdjustedVelocity < MinLinearSpeed)
             {
+                AdjustedVelocity = MinLinearSpeed;
                 Real Time = GetTicksToWait(IntersectionDistance , MinLinearSpeed);
                 Real stop_time = abs(Time - TimeToIntersection);
                 ptr1.StopTurningTime = stop_time;
@@ -375,8 +375,10 @@ void CThesisLoopFunctions::IntersectionCollisionCheck(CFootBotThesis::RobotData&
                 IntersectionDistance = DistanceToIntersection_Robot2;
                 TimeToIntersection = TicksToWait_Robot1 + TicksToWaitforSafedistance;
                 AdjustedVelocity = (IntersectionDistance/ TimeToIntersection) * SimulatorTicksperSec;
+                
                 if(AdjustedVelocity < MinLinearSpeed)
                 {
+                    AdjustedVelocity = MinLinearSpeed;
                     Real Time = GetTicksToWait(IntersectionDistance , MinLinearSpeed);
                     Real stop_time = abs(Time - TimeToIntersection);
                     ptr2.StopTurningTime = stop_time;
@@ -389,6 +391,7 @@ void CThesisLoopFunctions::IntersectionCollisionCheck(CFootBotThesis::RobotData&
                 AdjustedVelocity = (IntersectionDistance/TimeToIntersection) * SimulatorTicksperSec;
                 if(AdjustedVelocity < MinLinearSpeed)
                 {
+                    AdjustedVelocity = MinLinearSpeed;
                     Real Time = GetTicksToWait(IntersectionDistance , MinLinearSpeed);
                     Real stop_time = abs(Time - TimeToIntersection);
                     ptr1.StopTurningTime = stop_time;

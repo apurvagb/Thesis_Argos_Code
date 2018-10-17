@@ -110,6 +110,9 @@ loop_functions/thesis_loop_functions/libthesis_loop_functions.so: loop_functions
 loop_functions/thesis_loop_functions/libthesis_loop_functions.so: loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/thesis_loop_functions_autogen/mocs_compilation.cpp.o
 loop_functions/thesis_loop_functions/libthesis_loop_functions.so: loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/build.make
 loop_functions/thesis_loop_functions/libthesis_loop_functions.so: controllers/thesis_sample/libthesis_sample.dylib
+loop_functions/thesis_loop_functions/libthesis_loop_functions.so: /usr/local/Cellar/qt/5.11.1/lib/QtWidgets.framework/QtWidgets
+loop_functions/thesis_loop_functions/libthesis_loop_functions.so: /usr/local/Cellar/qt/5.11.1/lib/QtGui.framework/QtGui
+loop_functions/thesis_loop_functions/libthesis_loop_functions.so: /usr/local/Cellar/qt/5.11.1/lib/QtCore.framework/QtCore
 loop_functions/thesis_loop_functions/libthesis_loop_functions.so: loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/apurvagb/argos3-examples/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX shared module libthesis_loop_functions.so"
 	cd /Users/apurvagb/argos3-examples/build/loop_functions/thesis_loop_functions && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/thesis_loop_functions.dir/link.txt --verbose=$(VERBOSE)

@@ -1658,8 +1658,8 @@ loop_functions/manualcontrol_loop_functions/preinstall:
 # Target rules for target loop_functions/manualcontrol_loop_functions/CMakeFiles/manualcontrol_loop_functions.dir
 
 # All Build rule for target.
-loop_functions/manualcontrol_loop_functions/CMakeFiles/manualcontrol_loop_functions.dir/all: controllers/footbot_manualcontrol/CMakeFiles/footbot_manualcontrol.dir/all
 loop_functions/manualcontrol_loop_functions/CMakeFiles/manualcontrol_loop_functions.dir/all: loop_functions/manualcontrol_loop_functions/CMakeFiles/manualcontrol_loop_functions_autogen.dir/all
+loop_functions/manualcontrol_loop_functions/CMakeFiles/manualcontrol_loop_functions.dir/all: controllers/footbot_manualcontrol/CMakeFiles/footbot_manualcontrol.dir/all
 	$(MAKE) -f loop_functions/manualcontrol_loop_functions/CMakeFiles/manualcontrol_loop_functions.dir/build.make loop_functions/manualcontrol_loop_functions/CMakeFiles/manualcontrol_loop_functions.dir/depend
 	$(MAKE) -f loop_functions/manualcontrol_loop_functions/CMakeFiles/manualcontrol_loop_functions.dir/build.make loop_functions/manualcontrol_loop_functions/CMakeFiles/manualcontrol_loop_functions.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/apurvagb/argos3-examples/build/CMakeFiles --progress-num=66,67,68 "Built target manualcontrol_loop_functions"
@@ -1747,8 +1747,8 @@ loop_functions/thesis_loop_functions/preinstall:
 # Target rules for target loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir
 
 # All Build rule for target.
-loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/all: controllers/thesis_sample/CMakeFiles/thesis_sample.dir/all
 loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/all: loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions_autogen.dir/all
+loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/all: controllers/thesis_sample/CMakeFiles/thesis_sample.dir/all
 	$(MAKE) -f loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/build.make loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/depend
 	$(MAKE) -f loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/build.make loop_functions/thesis_loop_functions/CMakeFiles/thesis_loop_functions.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/apurvagb/argos3-examples/build/CMakeFiles --progress-num=83,84,85,86 "Built target thesis_loop_functions"
@@ -1836,8 +1836,8 @@ loop_functions/galib_phototaxis_loop_functions/preinstall:
 # Target rules for target loop_functions/galib_phototaxis_loop_functions/CMakeFiles/galib_phototaxis_loop_functions.dir
 
 # All Build rule for target.
-loop_functions/galib_phototaxis_loop_functions/CMakeFiles/galib_phototaxis_loop_functions.dir/all: controllers/footbot_nn/CMakeFiles/footbot_nn.dir/all
 loop_functions/galib_phototaxis_loop_functions/CMakeFiles/galib_phototaxis_loop_functions.dir/all: loop_functions/galib_phototaxis_loop_functions/CMakeFiles/galib_phototaxis_loop_functions_autogen.dir/all
+loop_functions/galib_phototaxis_loop_functions/CMakeFiles/galib_phototaxis_loop_functions.dir/all: controllers/footbot_nn/CMakeFiles/footbot_nn.dir/all
 	$(MAKE) -f loop_functions/galib_phototaxis_loop_functions/CMakeFiles/galib_phototaxis_loop_functions.dir/build.make loop_functions/galib_phototaxis_loop_functions/CMakeFiles/galib_phototaxis_loop_functions.dir/depend
 	$(MAKE) -f loop_functions/galib_phototaxis_loop_functions/CMakeFiles/galib_phototaxis_loop_functions.dir/build.make loop_functions/galib_phototaxis_loop_functions/CMakeFiles/galib_phototaxis_loop_functions.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/apurvagb/argos3-examples/build/CMakeFiles --progress-num=58,59,60 "Built target galib_phototaxis_loop_functions"

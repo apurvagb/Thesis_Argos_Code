@@ -311,7 +311,7 @@ mpga_phototaxis_loop_functions_LIB_DEPENDS:STATIC=general;footbot_nn;general;arg
 pkgcfg_lib_ARGOS_argos3core_simulator:FILEPATH=/usr/local/Cellar/argos3/3.0.0-beta52/lib/argos3/libargos3core_simulator.dylib
 
 //Dependencies for the target
-thesis_loop_functions_LIB_DEPENDS:STATIC=general;thesis_sample;general;argos3core_simulator;general;argos3plugin_simulator_dynamics2d;general;argos3plugin_simulator_entities;general;argos3plugin_simulator_footbot;general;argos3plugin_simulator_genericrobot;general;argos3plugin_simulator_media;general;argos3plugin_simulator_qtopengl;
+thesis_loop_functions_LIB_DEPENDS:STATIC=general;thesis_sample;general;argos3core_simulator;general;argos3plugin_simulator_dynamics2d;general;argos3plugin_simulator_entities;general;argos3plugin_simulator_footbot;general;argos3plugin_simulator_genericrobot;general;argos3plugin_simulator_media;general;argos3plugin_simulator_qtopengl;general;Qt5::Widgets;general;Qt5::Gui;general;/System/Library/Frameworks/GLUT.framework;general;/System/Library/Frameworks/Cocoa.framework;general;/System/Library/Frameworks/OpenGL.framework;general;/System/Library/Frameworks/OpenGL.framework;general;argos3plugin_simulator_qtopengl;
 
 //Dependencies for the target
 thesis_sample_LIB_DEPENDS:STATIC=general;argos3core_simulator;general;argos3plugin_simulator_footbot;general;argos3plugin_simulator_genericrobot;
